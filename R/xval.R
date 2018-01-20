@@ -27,7 +27,7 @@
 #              stop("unrecognised classLab")
 #          xvalLoop <- xvalLoop(cluster)
 #	  N = ncol(exprs(data))
-#          inds <- 1:N
+#          inds <- seq_len(N)
 #
 #          ## cross-validation selection procedure
 #          if (xvalMethod == "LOO")
@@ -47,7 +47,7 @@
 #              selnProc <- function(i) indFun( data, classLab, i )
 #          }
 #
-#          fs.idx <- 1:nrow(exprs(data))           # feature set index
+#          fs.idx <- seq_len(nrow(exprs(data)))           # feature set index
 #          ## feature set selection
 #          if (missing(fsFun))
 #              fsProc <- function(idx, fs.idx) fs.idx
@@ -56,7 +56,7 @@
 #              if (!is.function(fsFun)) stop("fsFun should be a function")
 #              fsProc <- function(idx, fs.idx) {
 #                  fs.scores <- fsFun(data[,idx], classLab)
-#                  sort(fs.scores, index.return=TRUE, decreasing=decreasing)$ix[1:fsNum]
+#                  sort(fs.scores, index.return=TRUE, decreasing=decreasing)$ix[seq_len(fsNum)]
 #              }
 #          }
 #
@@ -67,7 +67,7 @@
 #              list( proc( data[fs.idx,], classLab, inds[idx], ...)@predLabels@.Data, fs.idx )
 #          }
 #
-#          out <- xvalLoop( 1:n, xvalidator, ... )
+#          out <- xvalLoop( seq_len(n), xvalidator, ... )
 #          classif <- unlist( sapply( out, function(x) x[[1]] ) )
 #
 #          if (!is.function(fsFun))
@@ -94,14 +94,14 @@
 # narr <- nrow(pData(data))
 # cnames <- unique(clabs)
 # ilist <- list()
-# for (i in 1:length(cnames))
+# for (i in seq_len(length(cnames)))
 #   ilist[[cnames[i]]] <- which( clabs == cnames[i] )
 # clens <- lapply(ilist,length)
 # nrep <- lapply(clens, function(x) ceiling(x/K))
 # grpinds <- list()
-# for (i in 1:length(nrep))
-#   grpinds[[i]] <- rep(1:K, nrep[[i]])[1:clens[[i]]]
-# (1:narr)[ - which( unlist(grpinds)==iternum ) ]
+# for (i in seq_len(length(nrep)))
+#   grpinds[[i]] <- rep(seq_len(K), nrep[[i]])[seq_len(clens[[i]])]
+# (seq_len(narr))[ - which( unlist(grpinds)==iternum ) ]
 #}
 
 balKfold.xvspec <- function(K) function( data, clab, iternum ) {
@@ -111,14 +111,14 @@ balKfold.xvspec <- function(K) function( data, clab, iternum ) {
  narr <- nrow(data)
  cnames <- unique(clabs)
  ilist <- list()
- for (i in 1:length(cnames))
+ for (i in seq_len(length(cnames)))
    ilist[[cnames[i]]] <- which( clabs == cnames[i] )
  clens <- lapply(ilist,length)
  nrep <- lapply(clens, function(x) ceiling(x/K))
  grpinds <- list()
- for (i in 1:length(nrep))
-   grpinds[[i]] <- rep(1:K, nrep[[i]])[1:clens[[i]]]
- (1:narr)[ - which( unlist(grpinds)==iternum ) ]
+ for (i in seq_len(length(nrep)))
+   grpinds[[i]] <- rep(seq_len(K), nrep[[i]])[seq_len(clens[[i]])]
+ (seq_len(narr))[ - which( unlist(grpinds)==iternum ) ]
 }
 
 
@@ -152,7 +152,7 @@ setMethod("xvalLoop", signature( cluster = "ANY" ), # default method -- return f
 #          if(!any(classLab == names(pData(data))))
 #              stop("unrecognised response variable")
 #          N <- ncol(exprs(data))
-#          inds <- 1:N
+#          inds <- seq_len(N)
 #
 #          ## cross-validation selection procedure
 #          if (xvalMethod == "LOO")
@@ -173,7 +173,7 @@ setMethod("xvalLoop", signature( cluster = "ANY" ), # default method -- return f
 #          }
 #
 #	  #reddata = exprs(data)[ attr(terms(formula), "term.labels")
-#          fs.idx <- 1:nrow(exprs(data))           # feature set index
+#          fs.idx <- seq_len(nrow(exprs(data)))           # feature set index
 #          ## feature set selection
 #          if (missing(fsFun))
 #              fsProc <- function(idx, fs.idx) fs.idx
@@ -182,7 +182,7 @@ setMethod("xvalLoop", signature( cluster = "ANY" ), # default method -- return f
 #              if (!is.function(fsFun)) stop("fsFun should be a function")
 #              fsProc <- function(idx, fs.idx) {
 #                  fs.scores <- fsFun(data[,idx], classLab)
-#                  sort(fs.scores, index.return=TRUE, decreasing=decreasing)$ix[1:fsNum]
+#                  sort(fs.scores, index.return=TRUE, decreasing=decreasing)$ix[seq_len(fsNum)]
 #              }
 #          }
 #
@@ -203,7 +203,7 @@ setMethod("xvalLoop", signature( cluster = "ANY" ), # default method -- return f
 #              list( MLearn(newfmla, data[fs.idx,], proc, inds[idx], ...)@predLabels@.Data, fs.idx )
 #          }
 #
-#          out <- xvalLoop( 1:n, xvalidator, ... )
+#          out <- xvalLoop( seq_len(n), xvalidator, ... )
 #          classif <- unlist( sapply( out, function(x) x[[1]] ) )
 #
 #          if (!is.function(fsFun))

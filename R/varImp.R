@@ -85,6 +85,6 @@ setMethod("report", "varImpStruct", function(x, n=10, plat, toktype) {
 	else if (x@method=="randomForest") 
 		{
 		mda <- x@.Data[,"MeanDecreaseAccuracy"]
-                omda <- order(-mda)[1:n]
+                omda <- order(-mda)[seq_len(n)]
 		return(data.frame(MnDecrAcc=mda[omda], names=vn[omda]))
 		} })

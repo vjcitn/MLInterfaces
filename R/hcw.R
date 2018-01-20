@@ -28,7 +28,7 @@ hclustWidget = function(mat, featureName="feature",
  ), server= function(input, output, session) {
     output$title <- renderText(title)
     output$tree <- renderPlot({
-dm = dist(mat[,1:input$ngenes], method=input$distmeth)
+dm = dist(mat[,seq_len(input$ngenes)], method=input$distmeth)
 sink(tempfile())
 cb <- clusterboot(dm, clustermethod=hclustCBI, method=input$fusemeth, k=input$numclus, showplots=FALSE, scaling=FALSE)
 sink(NULL)
@@ -44,14 +44,14 @@ sink(NULL)
              paste0(names(row), ": ", format(row), collapse = "<br />")
            }
 
-      pc = prcomp(mat[,1:input$ngenes])$x
-      dm = dist(mat[,1:input$ngenes], method=input$distmeth)
+      pc = prcomp(mat[,seq_len(input$ngenes)])$x
+      dm = dist(mat[,seq_len(input$ngenes)], method=input$distmeth)
 
 
       dend = hclust( dm, method=input$fusemeth )
       ct = cutree(dend, k=input$numclus)
       pcdf = data.frame(PC1=pc[,1], PC2=pc[,2], #tiss=pData(tiss)$Tissue,
-         rowid=1:nrow(pc), assigned=factor(ct))
+         rowid=seq_len(nrow(pc)), assigned=factor(ct))
       if (!is.null(auxdf)) {
          if ((nrow(auxdf) == nrow(pcdf))) pcdf = cbind(pcdf, auxdf)
            else message("nrow(auxdf) != nrow(mat), ignoring auxdf")

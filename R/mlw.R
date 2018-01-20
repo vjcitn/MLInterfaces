@@ -77,7 +77,7 @@ mlearnWidget = function(eset, infmla) {
             "randomForest" = list(importance=TRUE),
             "knn1" = NULL,
             "nnet(size, decay)" = list(size=input$nnetsize, decay=input$nnetdecayOrCP, MaxNWts=10000) )
-     xv = switch(input$valmeth, "random half" = sample(1:ncol(eset), size=ceiling(ncol(eset)/2)),
+     xv = switch(input$valmeth, "random half" = sample(seq_len(ncol(eset)), size=ceiling(ncol(eset)/2)),
                       "NOTEST" = xvalSpec("NOTEST"),
                       "5-fold xval"=xvalSpec("LOG", 5, balKfold.xvspec(5)),
                       "10-fold xval"=xvalSpec("LOG", 10, balKfold.xvspec(10)),
@@ -112,13 +112,13 @@ tize = function (x)
     sink(tf)
     print(RObject(x))
     rl = readLines(tf)
-    hwrite(matrix(rl[1:min(10, length(rl))], ncol=1), byrow=TRUE)
+    hwrite(matrix(rl[seq_len(min(10, length(rl)))], ncol=1), byrow=TRUE)
 }
 
    ans = reactive({ 
      argl = c(list(
                formula= infmla,
-               data=eset[1:nf(),], .method=mod()$learner, 
+               data=eset[seq_len(nf()),], .method=mod()$learner, 
                trainInd=mod()$xv ), mod()$extras )
      set.seed(input$seed)
      do.call(MLearn, argl ) })
@@ -151,7 +151,7 @@ tize = function (x)
                argl = c(list(
                formula= infmla,
                data=et2, .method=mod()$learner, 
-               trainInd=sample(1:ncol(et2), size=ceiling(ncol(et2)/2) )), mod()$extras )
+               trainInd=sample(seq_len(ncol(et2)), size=ceiling(ncol(et2)/2) )), mod()$extras )
              set.seed(input$seed)
              ans2 = do.call(MLearn, argl ) 
               rownames(et2) = paste0("X", featureNames(et2))
@@ -170,7 +170,7 @@ tize = function (x)
                argl = c(list(
                formula= infmla,
                data=et2, .method=mod()$learner, 
-               trainInd=sample(1:ncol(et2), size=ceiling(ncol(et2)/2)) ), mod()$extras )
+               trainInd=sample(seq_len(ncol(et2)), size=ceiling(ncol(et2)/2)) ), mod()$extras )
              set.seed(input$seed)
              ans2 = do.call(MLearn, argl ) 
               rownames(et2) = paste0("X", featureNames(et2))

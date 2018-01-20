@@ -40,7 +40,7 @@ projectLearnerToGrid = function(formula, data, learnerSchema, trainInds, ...,
 # 3b) obtain trained model predictions (labels) for grid inputs
   stopifnot(is.numeric(trainInds))
   nd = nrow(data)
-  testInds = setdiff(1:nd, trainInds)
+  testInds = setdiff(seq_len(nd), trainInds)
 # 2a:
   m1 = do.call(MLearn, c(list(formula, data, learnerSchema, trainInds), list(...)))
 # 2b:
@@ -58,7 +58,7 @@ projectLearnerToGrid = function(formula, data, learnerSchema, trainInds, ...,
   trainingLabels = as.character(fullresp[trainInds])
   testLabels = as.character(fullresp[testInds])
 # 2e: 
-  gpts = lapply( 1:ncol(trfeats),
+  gpts = lapply( seq_len(ncol(trfeats)),
      function(x) seq(min(trfeats[,x]), max(trfeats[,x]), length=ngpts))
   grid = do.call( expand.grid, gpts )
   colnames(grid) = colnames(trfeats)
@@ -132,18 +132,18 @@ setGeneric("learnerIn3D", function(x, ind1=1, ind2=2, ind3=3, ...)
     standardGeneric("learnerIn3D"))
 setMethod("learnerIn3D", "projectedLearner", 
    function(x, ind1=1, ind2=2, ind3=3, ...)  {
-     requireNamespace("rgl")
+#     requireNamespace("rgl")
      proj = x@gridFeatsProjectedToTrainingPCs
-     rgl::plot3d(proj[,ind1], proj[,ind2], proj[,ind3],
-            col=factor(x@gridPredictions),
-            xlab=paste0("PC", ind1),
-            ylab=paste0("PC", ind2),
-            zlab=paste0("PC", ind3),
-            ...)
-     rgl::text3d(x@testFeatsProjectedToTrainingPCs[, ind1], 
-                  x@testFeatsProjectedToTrainingPCs[, ind2], 
-                  x@testFeatsProjectedToTrainingPCs[, ind3], 
-                     texts=as.character(x@testLabels), col="black")
+#     rgl::plot3d(proj[,ind1], proj[,ind2], proj[,ind3],
+#            col=factor(x@gridPredictions),
+#            xlab=paste0("PC", ind1),
+#            ylab=paste0("PC", ind2),
+#            zlab=paste0("PC", ind3),
+#            ...)
+#     rgl::text3d(x@testFeatsProjectedToTrainingPCs[, ind1], 
+#                  x@testFeatsProjectedToTrainingPCs[, ind2], 
+#                  x@testFeatsProjectedToTrainingPCs[, ind3], 
+#                     texts=as.character(x@testLabels), col="black")
 })
 
 

@@ -132,7 +132,7 @@ setMethod("confuMat", c("classifierOutput","character"),
             }
             if (!isTRUE(all.equal(dim(ans), dim(templ)))) {
               used = colnames(ans)
-              for (i in 1:ncol(ans)) templ[, used[i]] = ans[, used[i]]
+              for (i in seq_len(ncol(ans))) templ[, used[i]] = ans[, used[i]]
               ans = templ
             }
             if (all(colnames(ans) %in% levels(giv))) return(ans[, levels(giv)])  # can reorder
@@ -245,13 +245,13 @@ setMethod("predScores", "classifierOutput", function(x) {
     trainOut <- as.character(x@trainOutcomes)
     testOut <- as.character(x@testOutcomes)
     trainInd <- x@trainInd
-    testInd <- (1:n)[ -trainInd ]
+    testInd <- (seq_len(n))[ -trainInd ]
     ans <-  matrix(0,
                    nrow = n,
                    ncol = ncol(tescores))
     ## tmp rownames - if NULL produces error
     ## when subsetting with rownames(ans)[testInd]
-    rownames(ans) <- 1:nrow(ans)
+    rownames(ans) <- seq_len(nrow(ans))
     colnames(ans) <- colnames(tescores)
     rownames(ans)[testInd] <- rownames(tescores)
     rownames(ans)[trainInd] <- rownames(trainScores(x))
@@ -260,7 +260,7 @@ setMethod("predScores", "classifierOutput", function(x) {
     ans[testInd, ] <- tescores
     ## updating train scores - setting appropriate cell to 1
     ## why not initialise to 1?
-    for (i in 1:length(trainInd))
+    for (i in seq_len(length(trainInd)))
       ans[trainInd[i], trainOut[i]] <- 1
   }
   return(ans)

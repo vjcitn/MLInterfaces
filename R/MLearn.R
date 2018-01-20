@@ -133,9 +133,9 @@ setMethod("MLearn",
             teo = model.response( tef )
             classLab = names(tef)[ respind <- attr( terms(formula,data=data), "response" ) ]
             N <- nrow(data)
-            inds <- 1:N
+            inds <- seq_len(N)
             if (xvspec@type == "NOTEST") {
-              ans = MLearn(formula, data, .method, 1:N, ...)
+              ans = MLearn(formula, data, .method, seq_len(N), ...)
               ans@call = thecall
               return(ans)
             }
@@ -178,9 +178,9 @@ setMethod("MLearn",
             out <-
               if (is.loaded("mc_fork", PACKAGE="parallel")) {
                 mcLapply <- get("mclapply", envir=getNamespace("parallel"))
-                mcLapply(1:n, xvalidator, ...)
+                mcLapply(seq_len(n), xvalidator, ...)
               } else {
-                lapply( 1:n, xvalidator, ... )
+                lapply( seq_len(n), xvalidator, ... )
               }  # thanks Martin Morgan!
             chkout = sapply(out, function(z) inherits(z, "try-error"))
             if (any(chkout)) stop("xvalidator iteration threw error")

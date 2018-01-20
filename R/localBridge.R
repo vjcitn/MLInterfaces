@@ -16,7 +16,7 @@ rab = function(formula, data, maxiter=200, maxdepth=1) {
  w = rep(1/N, N)
  data = data.frame(data, w=w)
  print("real adaboost iterations:")
- for (i in 1:maxiter) {
+ for (i in seq_len(maxiter)) {
     cat(i)
     data$w = w
     tr = rpart(formula, data=data, maxdepth=maxdepth, weights=w)

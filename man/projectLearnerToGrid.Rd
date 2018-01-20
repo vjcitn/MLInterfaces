@@ -1,6 +1,6 @@
 \name{projectLearnerToGrid}
 \alias{projectLearnerToGrid}
-%- Also NEED an '\alias' for EACH other topic documented here.
+
 \title{
 create learned tesselation of feature space after PC transformation
 }
@@ -15,7 +15,7 @@ projectLearnerToGrid(formula, data, learnerSchema,
    predExtras = list(), 
    predWrapper = force)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
   \item{formula}{
 standard formula, typically of the form "y~." where y denotes
@@ -53,16 +53,16 @@ labels from the RObject applied to the \code{fittedLearner}
 slot of the output object; this parameter defines that call.
 }
 }
-%\details{
-%%  ~~ If necessary, more details than the description above ~~
-%}
+
+
+
 \value{
 instance of \code{\link{projectedLearner-class}}
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+
+
+
+
+
 }
 \references{
 none.
@@ -70,22 +70,21 @@ none.
 \author{
 VJ Carey <stvjc@channing.harvard.edu>
 }
-%\note{
-%%  ~~further notes~~
-%}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
+
+
+
+
+
+
+
 \examples{
 library(mlbench)
 # demostrate with 3 dimensional hypercube problem
 kk = mlbench.hypercube()
 colnames(kk$x) = c("f1", "f2", "f3")
 hcu = data.frame(cl=kk$classes, kk$x)
-library(MLInterfaces)
 set.seed(1234)
 sam = sample(1:nrow(kk$x), size=nrow(kk$x)/2)
 ldap = projectLearnerToGrid(cl~., data=hcu, ldaI, 
@@ -96,12 +95,12 @@ nnetp = projectLearnerToGrid(cl~., data=hcu, nnetI, sam, size=2,
    decay=.01, predExtras=list(type="class"))
 plot(nnetp)
 confuMat(nnetp@fittedLearner)
-if (require(rgl) && interactive()) {
-    learnerIn3D(nnetp)
-    ## customising the rgl plot
-    learnerIn3D(nnetp, size = 10, alpha = 0.1)
+#if (requireNamespace("rgl") && interactive()) {
+#    learnerIn3D(nnetp)
+#    ## customising the rgl plot
+#    learnerIn3D(nnetp, size = 10, alpha = 0.1)
+#}
 }
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
+
 \keyword{ models }

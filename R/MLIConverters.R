@@ -73,8 +73,8 @@ MLIConverter.svm = function(obj, data, trainInd) { # decision.values parm needed
   ## names(tepr) = rownames(teData)
   ## names(trpr) = rownames(trData)
   new("classifierOutput",
-      testPredictions =factor(tepr[1:length(tepr)]),
-      trainPredictions=factor(trpr[1:length(trpr)]),
+      testPredictions =factor(tepr[seq_len(length(tepr))]),
+      trainPredictions=factor(trpr[seq_len(trpr)]),
       testScores=attr(tepr,"probabilities"),
       trainScores=attr(trpr,"probabilities"),
       RObject=obj)

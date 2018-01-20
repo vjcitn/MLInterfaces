@@ -88,7 +88,7 @@ setClass("xvalSpec",
 
 xvalSpec <- function(type,
                      niter = 0,
-                     partitionFunc = function(data, classLab,iternum){ (1:nrow(data))[-iternum] },
+                     partitionFunc = function(data, classLab,iternum){ (seq_len(nrow(data)))[-iternum] },
                      fsFun = function(formula, data) formula ) {
   new("xvalSpec", type=type, niter=niter, partitionFunc=partitionFunc, fsFun=fsFun)
 }

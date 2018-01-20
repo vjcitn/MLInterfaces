@@ -1,7 +1,7 @@
 \name{hclustWidget}
 \alias{hclustWidget}
 \alias{mlearnWidget}
-%- Also NEED an '\alias' for EACH other topic documented here.
+
 \title{
 shiny-oriented GUI for cluster or classifier exploration
 }
@@ -15,7 +15,7 @@ hclustWidget(mat, featureName = "feature", title =
 
 mlearnWidget(eset, infmla)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
   \item{mat}{
 matrix with feature vectors in rows
@@ -44,9 +44,9 @@ agglomeration method, etc.
 \value{
 a shinyApp result that will display in active browser
 }
-%\references{
-%% ~put references to the literature/web site here ~
-%}
+
+
+
 \author{
 VJ Carey <stvjc@channing.harvard.edu>
 }
@@ -57,11 +57,11 @@ that the annotation package for probe identifiers should be loaded
 or an error will be thrown.
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
-%\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-%}
+
+
+
+
 \examples{
 # should run with example(hclustWidget, ask=FALSE)
 if (interactive()) {
@@ -78,6 +78,6 @@ if (interactive()) {
   show(mlearnWidget(ALL[1:500,], mol.biol~.))
  }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
+
 \keyword{ models }

@@ -12,8 +12,8 @@ makeConfuMat <- function(i = 0:5, j = 15:20, k = 3) {
     if (k > 26)
         k <- 26
     m <- matrix(sample(i, 9, replace=TRUE), k)
-    dimnames(m) <- list(predicted = LETTERS[1:k],
-                        known = LETTERS[1:k])
+    dimnames(m) <- list(predicted = LETTERS[seq_len(k)],
+                        known = LETTERS[seq_len(k)])
     diag(m) <- sample(j, 3)
     as.table(m)
 }

@@ -52,8 +52,8 @@ plspinHcube = function(insbwidth=4) {
                          selected="10")),
         div(style="display:inline-block",
              selectInput("renderer", label = "Rendering method:",
-               choices = c("auto", "canvas", "webgl"),
-               selected = "webgl")), #),
+               choices = c("auto", "canvas"),
+               selected = "auto")), #),
              numericInput("cp", label = "rpart cp:",
                value = .01, min=.01, max=20, step=.01), #),
 # two boxes for tuning
@@ -106,7 +106,7 @@ plspinHcube = function(insbwidth=4) {
        data = mlbench.hypercube(n=input$Npoints, d=as.numeric(input$cubedim), sd=input$vertSd)
        data = data.frame(cl=data$classes, data$x)
 # training indices
-       tinds = sample(1:nrow(data),size=floor(nrow(data)/2),replace=FALSE)
+       tinds = sample(seq_len(nrow(data)),size=floor(nrow(data)/2),replace=FALSE)
 # model call -- need to ensure that 'extras' go into ... for projectLearnerToGrid
        argl = c(list(
                 formula=cl~., data=data, learnerSchema=mod()$learner, 
@@ -141,7 +141,10 @@ plspinHcube = function(insbwidth=4) {
        list(obj=obj, prmat=projtest[, c(as.numeric(input$dim1), as.numeric(input$dim2), as.numeric(input$dim3))],
                                   testlabs = as.character(cur@testLabels))
       })
-      output$spinner = renderScatterplotThree(  (ans()$obj)$points3d(ans()$prmat, labels=ans()$testlabs, color="black" ) )
+#     scatterplot3js(x, y, z, pch="o") %>%
+#        points3d(x + 0.1, y + 0.1, z, color="red", pch=paste("point", 1:5))
+
+      output$spinner = renderScatterplotThree(  (ans()$obj) %>% points3d(ans()$prmat, labels=ans()$testlabs, color="black" ) )
 })
 }
 
@@ -196,8 +199,8 @@ plspinDF = function(dataframe, insbwidth=4) {
                          selected="10")),
         div(style="display:inline-block",
              selectInput("renderer", label = "Rendering method:",
-               choices = c("auto", "canvas", "webgl"),
-               selected = "webgl")), #),
+               choices = c("auto", "canvas"),
+               selected = "auto")), #),
              numericInput("cp", label = "rpart cp:",
                value = .01, min=.01, max=20, step=.01), #),
 # two boxes for tuning
@@ -249,10 +252,10 @@ plspinDF = function(dataframe, insbwidth=4) {
 #
        fnames = names(dataframe)
        clid = which(fnames=="cl")
-       data = dataframe[1:input$Npoints, unique(fnames[c(1:input$Nfeat, clid)])]
+       data = dataframe[seq_len(input$Npoints), unique(fnames[c(seq_len(input$Nfeat), clid)])]
        nrec = nrow(data)
 # training indices
-       tinds = sample(1:nrow(data),size=floor(nrow(data)/2),replace=FALSE)
+       tinds = sample(seq_len(nrow(data)),size=floor(nrow(data)/2),replace=FALSE)
 # model call -- need to ensure that 'extras' go into ... for projectLearnerToGrid
        argl = c(list(
                 formula=cl~., data=data, learnerSchema=mod()$learner, 
@@ -285,7 +288,7 @@ plspinDF = function(dataframe, insbwidth=4) {
        list(obj=obj, prmat=projtest[, c(as.numeric(input$dim1), as.numeric(input$dim2), as.numeric(input$dim3))],
                                   testlabs = as.character(cur@testLabels))
       })
-      output$spinner = renderScatterplotThree(  (ans()$obj)$points3d(ans()$prmat, labels=ans()$testlabs, color="black" ) )
+      output$spinner = renderScatterplotThree(  (ans()$obj) %>% points3d(ans()$prmat, labels=ans()$testlabs, color="black" ) )
 })
 }
 
