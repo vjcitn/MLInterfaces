@@ -36,7 +36,7 @@ MLIConverter.dlda = function(obj, data, trainInd) {
    trpr = outcoLev[predict(obj, trData)]
    names(tepr) = rownames(teData)
    names(trpr) = rownames(trData)
-   new("classifierOutput", testPredictions=factor(tepr), 
+   new("classifierOutput", testPredictions=factor(tepr),
        trainPredictions=factor(trpr), RObject=obj)
    }
 
@@ -63,18 +63,19 @@ MLIConverterListEl.class = function(obj, data, trainInd) {
    }
 
 MLIConverter.svm = function(obj, data, trainInd) { # decision.values parm needed
+    browser()
   teData = data[-trainInd,]
   trData = data[trainInd,]
   ##tepr = predict(obj, teData, decision.values=FALSE)
   ##trpr = predict(obj, trData, decision.values=FALSE)
   ## From ?svn: The center and scale values are returned and used for later predictions.
   tepr = predict(obj, teData, decision.values=TRUE, probability=TRUE)
-  trpr = predict(obj, trData, decision.values=TRUE, probability=TRUE)   
+  trpr = predict(obj, trData, decision.values=TRUE, probability=TRUE)
   ## names(tepr) = rownames(teData)
   ## names(trpr) = rownames(trData)
   new("classifierOutput",
       testPredictions =factor(tepr[seq_len(length(tepr))]),
-      trainPredictions=factor(trpr[seq_len(trpr)]),
+      trainPredictions=factor(trpr[seq_len(length(trpr))]),
       testScores=attr(tepr,"probabilities"),
       trainScores=attr(trpr,"probabilities"),
       RObject=obj)
@@ -269,7 +270,7 @@ MLIConverter.Bgbm = function(n.trees.pred=1000, thresh=.5) function(obj, data, t
        trainPredictions=factor(trpr), RObject=obj)
    }
 
-MLIConverter.blackboost = function (obj, data, trainInd) 
+MLIConverter.blackboost = function (obj, data, trainInd)
 {
     teData = data[-trainInd, ]
     trData = data[trainInd, ]
@@ -277,7 +278,7 @@ MLIConverter.blackboost = function (obj, data, trainInd)
     trpr = predict(obj, trData, type="class")
     names(tepr) = rownames(teData)
     names(trpr) = rownames(trData)
-    new("classifierOutput", testPredictions = factor(tepr), trainPredictions = factor(trpr), 
+    new("classifierOutput", testPredictions = factor(tepr), trainPredictions = factor(trpr),
         RObject = obj)
 }
 
@@ -285,9 +286,9 @@ MLIConverter.randomForest = function (obj, data, trainInd) {
     teData = data[-trainInd, ]
     trData = data[trainInd, ]
     tepr = predict(obj, teData, type="response")
-    tesco = predict(obj, teData, type="prob")    
+    tesco = predict(obj, teData, type="prob")
     trpr = predict(obj, trData, type="response")
-    trsco = predict(obj, trData, type="prob")    
+    trsco = predict(obj, trData, type="prob")
     names(tepr) = rownames(teData)
     names(trpr) = rownames(trData)
     new("classifierOutput",
@@ -306,17 +307,17 @@ MLIConverter.plsda <- function(obj, data, trainInd) {
   tePredProb <- predict(obj,teData,type="prob")
   if (inherits(tePredProb, "array") & dim(tePredProb)[3] == 1)
     tePredProb <- tePredProb[, , 1]
-  tePredClass <- predict(obj,teData,type="class")   
-  names(tePredClass) <- rownames(teData)  
+  tePredClass <- predict(obj,teData,type="class")
+  names(tePredClass) <- rownames(teData)
   trPredProb <- predict(obj,trData,type="prob")
   if (inherits(trPredProb, "array") & dim(trPredProb)[3] == 1)
     trPredProb <- trPredProb[, , 1]
-  trPredClass <- predict(obj,trData,type="class")   
+  trPredClass <- predict(obj,trData,type="class")
   names(trPredClass) <- rownames(trData)
   new("classifierOutput",
-      testPredictions = tePredClass, 
+      testPredictions = tePredClass,
       testScores = tePredProb,
-      trainPredictions = trPredClass, 
+      trainPredictions = trPredClass,
       trainScores = trPredProb,
       RObject = obj)
 }
