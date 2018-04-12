@@ -7,9 +7,9 @@ machine learning exercise}
 \description{container for information specifying a cross-validated
 machine learning exercise}
 \usage{
-xvalSpec( type, niter=0, partitionFunc=function(data, classLab, iternum ) {
-				(1:nrow(data))[-iternum] },
-	                 fsFun = function(formula, data) formula )
+xvalSpec(type, niter=0, 
+         partitionFunc = function(data, classLab,iternum) { (seq_len(nrow(data)))[-iternum] },
+         fsFun = function(formula, data) formula )
 }
 \arguments{
 
