@@ -35,10 +35,17 @@ all2 <- ALL[,kp]
 # sample 2 genes at random
 #
 set.seed(1234)
-ng <- nrow(exprs(all2))
-pick <- sample(1:ng, size=2, replace=FALSE)
+ng <- nrow(exprs(all2)) # pick 5 in case any NAs come back
+pick <- sample(1:ng, size=5, replace=FALSE)
 gg <- all2[pick,]
 sym <- unlist(mget(featureNames(gg), hgu95av2SYMBOL))
+bad = which(is.na(sym))
+if (length(bad)>0) {
+  gg = gg[-bad,]
+  sym = sym[-bad]
+  }
+gg = gg[1:2,]
+sym = sym[1:2]
 featureNames(gg) <- sym
 gg$class = factor(ifelse(all2$mol.biol=="NEG", "NEG", "POS"))
 
