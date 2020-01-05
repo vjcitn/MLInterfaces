@@ -169,6 +169,10 @@ summary(testScores(gbrun))
 
 \subsection{A harder example: rda}
 
+As of Jan 2020, rda has been proposed for archiving at CRAN.  While
+maintenance of rda is being contemplated, the computations in this
+section are conditional on having an installed instance of rda.
+
 The \Rpackage{rda} package includes the rda function for regularized
 discriminant analysis, and rda.cv for aiding in tuning parameter selection.
 No formula interface is supported, and the predict method delivers
@@ -179,6 +183,7 @@ methodology.
 
 First we create a wrapper that uses formula-data for the rda.cv function:
 <<dowrap>>=
+if (requireNamespace("rda", quietly=TRUE)) {
 rdaCV = function( formula, data, ... ) {
  passed = list(...)
  if ("genelist" %in% names(passed)) stop("please don't supply genelist parameter.")
@@ -192,11 +197,13 @@ rdaCV = function( formula, data, ... ) {
  run1 = rda( x, resp, ... )
  rda.cv( run1, x, resp )
 }
+}
 @
 
 We also create a wrapper for a non-cross-validated call, where
 alpha and delta parameters are specified:
 <<dow2>>=
+if (requireNamespace("rda", quietly=TRUE)) {
 rdaFixed = function( formula, data, alpha, delta, ... ) {
  passed = list(...)
  if ("genelist" %in% names(passed)) stop("please don't supply genelist parameter.")
@@ -212,6 +219,7 @@ rdaFixed = function( formula, data, alpha, delta, ... ) {
  list(finalFit=finalFit, x=x, resp.num=resp, resp.fac=resp.fac, featureNames=featureNames,
     keptFeatures=featureNames[ which(apply(finalFit$gene.list,3,function(x)x)==1) ])
 }
+}
 @
 
 Now our real interface is defined.  It runs the rdaCV  wrapper
@@ -223,6 +231,7 @@ This has to deal with the fact that rda does not
 use factors.
 
 <<doreal>>=
+if (requireNamespace("rda", quietly=TRUE)) {
 rdacvML = function(formula, data, ...) {
  run1 = rdaCV( formula, data, ... )
  perf.1se = cverrs(run1)$one.se.pos
@@ -252,6 +261,7 @@ print.rdacvML = function(x, ...) {
  print(names(x$finalFit))
  cat("---\n") 
  cat("the rda.cv result is in the xvalAns attribute of the main object.\n")
+}
 }
 @
 

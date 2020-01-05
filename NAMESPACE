@@ -7,7 +7,6 @@ import("MASS")
 import("rpart")
 import("sfsmisc")
 import("pls")
-import("rda")
 import("shiny")
 import("ggvis")
 import("fpc")
@@ -44,17 +43,14 @@ export(randomForestI, knnI, dldaI, nnetI, rpartI,
        ldaI, svmI, ldaI.predParms, qdaI, glmI.logistic, 
        RABI, lvqI, naiveBayesI, baggingI, knn2, dlda2, 
        rab, lvq, RAB, DAB, plsda2, svm2, ksvm2, 
-       xvalSpec, getVarImp, balKfold.xvspec, rdacvI, rdacvML,
-       rdaI, rdaML, 
-       plotXvalRDA, makeLearnerSchema, standardMLIConverter, sldaI, 
+       xvalSpec, getVarImp, balKfold.xvspec, 
+       makeLearnerSchema, standardMLIConverter, sldaI, 
        fs.absT, fs.probT, ksvmI, knn.cvI, knn.cv2, 
        adaI, fs.topVariance, hclustI, kmeansI, pamI,
        blackboostI,
        gbm2, BgbmI, plsdaI,
        confuTab) 
 
-S3method("print", "rdacvML")
-S3method("print", "rdaML")
 S3method("predict", "classifierOutput")
 
 exportMethods("plot")

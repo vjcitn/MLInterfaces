@@ -1,3 +1,7 @@
+CHANGES IN VERSION 1.67.1
+-------------------------
+ o rda has been moved to 'Enhances' and its use is conditional its presence <2019-01-05>
+
 CHANGES IN VERSION 1.59.2
 -------------------------
  o Fix warning stemming from base::seq_len in

@@ -129,6 +129,7 @@ predict.dlda2 = function(object, newdata, ...) {
 # -- rdacvML -- bridges to rda::rda.cv which requires a run of rda
 
 rdaCV = function( formula, data, ... ) {
+ if (!requireNamespace("rda")) stop("install package rda to use this function")
  passed = list(...)
  if ("genelist" %in% names(passed)) stop("please don't supply genelist parameter.")
  # data input to rda needs to be GxN
@@ -143,6 +144,7 @@ rdaCV = function( formula, data, ... ) {
 }
 
 rdaFixed = function( formula, data, alpha, delta, ... ) {
+ if (!requireNamespace("rda")) stop("install package rda to use this function")
  passed = list(...)
  if ("genelist" %in% names(passed)) stop("please don't supply genelist parameter.")
  # data input to rda needs to be GxN
@@ -159,6 +161,7 @@ rdaFixed = function( formula, data, alpha, delta, ... ) {
 }
 
 rdacvML = function(formula, data, ...) {
+ if (!requireNamespace("rda")) stop("install package rda to use this function")
  run1 = rdaCV( formula, data, ... )
  perf.1se = cverrs(run1)$one.se.pos
  del2keep = which.max(perf.1se[,2])
@@ -172,6 +175,7 @@ rdacvML = function(formula, data, ...) {
 }
 
 rdaML = function(formula, data, ...) {
+ if (!requireNamespace("rda")) stop("install package rda to use this function")
  dots = list(...)
  nd = names(dots)
  if (!(all(c("alpha", "delta") %in% nd))) stop("alpha and delta must be supplied with rdaI")
@@ -206,6 +210,7 @@ plotXvalRDA = function(cfo, ...) {
 }
 
 predict.rdacvML = function(object, newdata, ...) {
+ if (!requireNamespace("rda")) stop("install package rda to use this function")
  newd = data.matrix(newdata)
  fnames = rownames(object$x)
  newd = newd[, fnames]
@@ -216,6 +221,7 @@ predict.rdacvML = function(object, newdata, ...) {
 }
 
 predict.rdaML = function(object, newdata, ...) {
+ if (!requireNamespace("rda")) stop("install package rda to use this function")
  newd = data.matrix(newdata)
  fnames = rownames(object$x)
  newd = newd[, fnames]
