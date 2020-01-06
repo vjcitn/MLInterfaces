@@ -6,7 +6,7 @@ makeLearnerSchema = function(packname, mlfunname, converter, predicter) {
   if (missing(predicter)) 
     return(new("learnerSchema",
                packageName=packname,
-               mlFunName=mlfunname,
+               mlFunName=mlfunname,  # assumes it is exported?
                converter=converter))
   return(new("learnerSchema",
              packageName=packname,

@@ -667,10 +667,11 @@ very inaccurate, so the estimator is shrunk towards the identity.
 We have a rudimentary interface, in which the
 key parameters are chosen by native cross-validation (in rda.cv)
 and then applied once to get the final object.
-<<lkrda,results=hide,cache=TRUE>>=
+<<lkrda,results=hide,cache=FALSE>>=
 if (requireNamespace("rda", quietly=TRUE)) {
+library("rda")
 set.seed(1234)
-rdaALL = MLearn( mol.biol~., fusk, rdacvI, 1:40 )
+rdaALL = MLearn( mol.biol~., fusk, MLInterfaces:::rdacvI, 1:40 )
 rdaALL
 confuMat(rdaALL)
 }

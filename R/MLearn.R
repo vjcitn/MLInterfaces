@@ -7,7 +7,9 @@ setMethod("MLearn",
             pname = .method@packageName
             fname = .method@mlFunName
             ## create the requested function
-            lfun = do.call("::", list(pname, fname))
+            lfun = try(do.call("::", list(pname, fname)), silent=TRUE)
+	    if (inherits(lfun, "try-error"))
+            lfun = try(do.call(":::", list(pname, fname)), silent=TRUE) # deal with rdacvML
             ## build test and train subsets
             if (length(trainInd) != nrow(data))
               tedata = gdata::drop.levels(data[-trainInd,])

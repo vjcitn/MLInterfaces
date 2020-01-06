@@ -139,8 +139,8 @@ rdaCV = function( formula, data, ... ) {
  x = t(x)
  mf = model.frame(formula, data)
  resp = as.numeric(factor(model.response(mf)))
- run1 = rda( x, resp, ... )
- rda.cv( run1, x, resp )
+ run1 = rda::rda( x, resp, ... )
+ rda::rda.cv( run1, x, resp )
 }
 
 rdaFixed = function( formula, data, alpha, delta, ... ) {
@@ -155,7 +155,7 @@ rdaFixed = function( formula, data, alpha, delta, ... ) {
  featureNames = rownames(x)
  mf = model.frame(formula, data)
  resp = as.numeric(resp.fac <- factor(model.response(mf)))
- finalFit=rda( x, resp, genelist=TRUE, alpha=alpha, delta=delta, ... )
+ finalFit=rda::rda( x, resp, genelist=TRUE, alpha=alpha, delta=delta, ... )
  list(finalFit=finalFit, x=x, resp.num=resp, resp.fac=resp.fac, featureNames=featureNames,
     keptFeatures=featureNames[ which(apply(finalFit$gene.list,3,function(x)x)==1) ])
 }

@@ -184,6 +184,7 @@ methodology.
 First we create a wrapper that uses formula-data for the rda.cv function:
 <<dowrap>>=
 if (requireNamespace("rda", quietly=TRUE)) {
+library("rda")
 rdaCV = function( formula, data, ... ) {
  passed = list(...)
  if ("genelist" %in% names(passed)) stop("please don't supply genelist parameter.")
