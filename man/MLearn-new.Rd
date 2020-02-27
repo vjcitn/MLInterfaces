@@ -329,15 +329,15 @@ plot(c3, data=crabs[,c("CL", "CW", "RW")])
 set.seed(1234)
 kp = sample(1:200, size=120)
 
-plsda.1 = MLearn(sp~CW+RW, data=crabs, plsdaI, kp, probMethod="Bayes")
-plsda.1
-confuMat(plsda.1)
-confuMat(plsda.1,t=.65) ## requires at least 0.65 post error prob to assign species
-
-plsda.2 = MLearn(type~., data=sample.ExpressionSet[100:250,], plsdaI, 1:16)
-plsda.2
-confuMat(plsda.2)
-confuMat(plsda.2,t=.65) ## requires at least 0.65 post error prob to assign outcome
+#plsda.1 = MLearn(sp~CW+RW, data=crabs, plsdaI, kp, probMethod="Bayes")
+#plsda.1
+#confuMat(plsda.1)
+#confuMat(plsda.1,t=.65) ## requires at least 0.65 post error prob to assign species
+#
+#plsda.2 = MLearn(type~., data=sample.ExpressionSet[100:250,], plsdaI, 1:16)
+#plsda.2
+#confuMat(plsda.2)
+#confuMat(plsda.2,t=.65) ## requires at least 0.65 post error prob to assign outcome
 
 ## examples for predict
 clout <- MLearn(type~., sample.ExpressionSet[100:250,], svmI , 1:16)

@@ -75,8 +75,8 @@ clout.knn <- MLearn(type~., sample.ExpressionSet[100:250,], knnI(k=3), trainInd)
 predict(clout.knn, sample.ExpressionSet[100:250,-trainInd],k=1)
 predict(clout.knn, sample.ExpressionSet[100:250,-trainInd],k=3)
 
-clout.plsda <- MLearn(type~., sample.ExpressionSet[100:250,], plsdaI, trainInd)
-predict(clout.plsda, sample.ExpressionSet[100:250,-trainInd])
+#clout.plsda <- MLearn(type~., sample.ExpressionSet[100:250,], plsdaI, trainInd)
+#predict(clout.plsda, sample.ExpressionSet[100:250,-trainInd])
 
 clout.nb <- MLearn(type~., sample.ExpressionSet[100:250,], naiveBayesI, trainInd)
 predict(clout.nb, sample.ExpressionSet[100:250,-trainInd])

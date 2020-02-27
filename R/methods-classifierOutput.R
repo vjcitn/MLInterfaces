@@ -126,9 +126,10 @@ setMethod("confuMat", c("classifierOutput","character"),
               ## this is generally the case when some items have not been
               ## predicted with a score >= t and have been returned as NA
               ## predictions. Adding that column to the template.
-              oldcolnames <- colnames(templ)
-              templ <-  cbind(templ,0)
-              colnames(templ) <- c(oldcolnames,'NA')
+           #   oldcolnames <- colnames(templ) # Feb 17 2020 -- otiose
+           #   templ <-  cbind(templ,0)
+           #   colnames(templ) <- c(oldcolnames,'NA')
+              templ[rownames(ans),colnames(ans)] = ans
             }
             if (!isTRUE(all.equal(dim(ans), dim(templ)))) {
               used = colnames(ans)

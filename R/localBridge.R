@@ -337,7 +337,7 @@ plsda2 <- function (formula,
                     ) {
   mf <- model.frame(formula, data)
   cl <- factor(model.response(mf))
-  x <- mf[, -1]
+#  x <- mf[, -1]
   ans <- caret::plsda(x, cl,
                       probMethod=probMethod,
                       ncomp=ncomp,
