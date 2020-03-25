@@ -38,6 +38,11 @@ setClass("learnerSchema",
 #     agglomMethod="character", 
 #     algorithm="character", extras="list"), contains="learnerSchema")
 
+setClass("clusteringSchema", representation(
+   package="character", mlFunName="character",
+   distFun="function", converter="function"))
+
+
 setClass("classifierOutput", representation(
         trainInd="numeric",
         testOutcomes="factor",
@@ -66,11 +71,11 @@ setClass("classifierOutput", representation(
 #setClass("nonstandardLearnerSchema", representation(frontConverter="function",
 #   hasNamespace="logical"), contains="learnerSchema")
 
-#setOldClass("silhouette")
+setOldClass("silhouette")
 #
-#setOldClass("prcomp")
+setOldClass("prcomp")
 #
-#setClass("prcompObj", contains="prcomp")
+setClass("prcompObj", contains="prcomp")
 #
 #setClass("clusteringOutput", representation(
 #	partition="integer", silhouette="silhouette", distEnv="environment",
@@ -101,3 +106,16 @@ xvalSpec <- function(type,
 #   b) probability matrices (as with nnet predict) vs
 #       vector scores (as in knn voting proportions)
 
+
+setClass("clusteringOutput", representation(
+        partition="numeric", silhouette="silhouette", 
+        prcomp="prcompObj", distFun="function", converter="function",
+        call="call", learnerSchema="clusteringSchema",
+        RObject="ANY"), prototype=prototype(
+                  partition=numeric(0),
+                  silhouette={x = 0; class(x)="silhouette"; x}, 
+                  prcomp={x = 0; class(x)="prcomp"; new("prcompObj", x)},
+                  distFun = dist, converter=function(){}, call=new("call"))
+                  )   
+setGeneric("RObject", function(x) standardGeneric("RObject"))
+setMethod("RObject", "clusteringOutput", function(x)x@RObject)

@@ -140,7 +140,7 @@ MLIConverter.rpart = function(obj, data, trainInd) { # decision.values parm need
    names(tepr) = rownames(teData)
    names(trpr) = rownames(trData)
    names(teprob) = rownames(teData)
-   new("classifierOutput", testPredictions=factor(tepr), testScores=teprob,
+   new("classifierOutput", testPredictions=factor(tepr), testScores=teprob, testOutcomes=factor(),
        trainPredictions=factor(trpr), RObject=obj)
    }
 

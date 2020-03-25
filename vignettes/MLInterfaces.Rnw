@@ -108,6 +108,7 @@ from Golub's data.
 <<results=hide>>=
 library(MLInterfaces)
 library(golubEsets)
+library(genefilter)
 <<redu>>=
 data(Golub_Merge)
 smallG <- Golub_Merge[200:259,]

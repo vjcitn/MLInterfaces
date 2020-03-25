@@ -1,11 +1,28 @@
+setOldClass("prcomp")
+setOldClass("silhouette")
+setClass("prcompObj", contains="prcomp")
+
+#setClass("clusteringOutput", representation(
+#        partition="numeric", silhouette="silhouette", 
+#        prcomp="prcompObj", distFun="function", converter="function",
+#        call="call", learnerSchema="clusteringSchema",
+#        RObject="ANY"), prototype=prototype(
+#                  partition=numeric(0),
+#                  silhouette={x = 0; class(x)="silhouette"; x},
+#                  prcomp={x = 0; class(x)="prcomp"; new("prcompObj", x)},
+#                  distFun = dist, converter=function(){}, call=new("call"))
+#                  )
+
+#setGeneric("RObject", function(x) standardGeneric("RObject"))
+setMethod("RObject", "clusteringOutput", function(x) x@RObject)
 
 #setGeneric("MLearnC", 
 #   function(formula, data, schema, ...)
 #     standardGeneric("MLearnC"))
 
-setClass("clusteringSchema", representation(
-   package="character", mlFunName="character",
-   distFun="function", converter="function"))
+#setClass("clusteringSchema", representation(
+#   package="character", mlFunName="character",
+#   distFun="function", converter="function"))
 
 setMethod("show", "clusteringSchema", function(object) {
   cat("MLInterfaces clusteringSchema for calling\n")
@@ -18,21 +35,8 @@ setMethod("getDist", "clusteringSchema", function(x) x@distFun)
 setMethod("getConverter", "clusteringSchema", function(x) x@converter)
 
 ## require(cluster)
-setOldClass("silhouette")
 
-setOldClass("prcomp")
-setClass("prcompObj", contains="prcomp")
 
-setClass("clusteringOutput", representation(
-        partition="numeric", silhouette="silhouette", 
-        prcomp="prcompObj", distFun="function", converter="function",
-        call="call", learnerSchema="clusteringSchema",
-        RObject="ANY"), prototype=prototype(
-                  partition=numeric(0),
-                  silhouette={x = 0; class(x)="silhouette"; x},
-                  prcomp={x = 0; class(x)="prcomp"; new("prcompObj", x)},
-                  distFun = dist, converter=function(){}, call=new("call"))
-                  )
 
 setMethod("show", "clusteringOutput", function(object) {
  cat("clusteringOutput: partition table\n")
@@ -41,8 +45,6 @@ setMethod("show", "clusteringOutput", function(object) {
  print(object@call)
 })
 
-#setGeneric("RObject", function(x) standardGeneric("RObject"))
-setMethod("RObject", "clusteringOutput", function(x) x@RObject)
 
 setMethod("plot", "clusteringOutput", function(x, y, ...) {
   opar = par(no.readonly=TRUE)

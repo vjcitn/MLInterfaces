@@ -82,6 +82,7 @@ predict method) that special software is needed to adapt MLearn to work with the
 Thus we have defined a learnerSchema class,
 <<lks>>=
 library(MLInterfaces)
+library(gbm)
 getClass("learnerSchema")
 @
 along with a constructor used to define a family of schema objects that help

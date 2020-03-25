@@ -9,6 +9,10 @@
 \alias{getDist,clusteringSchema-method}
 \alias{getConverter}
 \alias{getDist}
+\alias{clusteringSchema-class}
+\alias{prcompObj-class}
+\alias{silhouette-class}
+\alias{prcomp-class}
 
 \title{container for clustering outputs in uniform structure}
 \description{container for clustering outputs in uniform structure}

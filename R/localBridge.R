@@ -114,7 +114,7 @@ dlda2 = function (formula, data, ...)
     x = mf[, -1]
     ## require(sfsmisc)
 # deal with global visibility
-    ans = get("diagDA")(x, as.numeric(cl), x, ...) # not a list any more!
+    ans = sfsmisc::diagDA(x, as.numeric(cl), x, ...) # not a list any more!
     ans = list(traindat = x, ans = ans, traincl = cl)
     class(ans) = "dlda2"
     ans
@@ -123,7 +123,7 @@ dlda2 = function (formula, data, ...)
 predict.dlda2 = function(object, newdata, ...) {
 ## require(sfsmisc)
 # deal with global visibility
- get("diagDA")( object$traindat, as.numeric(object$traincl), newdata, ... )
+ sfsmisc::diagDA( object$traindat, as.numeric(object$traincl), newdata, ... )
 }
 
 # -- rdacvML -- bridges to rda::rda.cv which requires a run of rda

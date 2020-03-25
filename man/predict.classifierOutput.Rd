@@ -58,6 +58,7 @@
 }
 
 \examples{
+\dontrun{
 set.seed(1234)
 data(sample.ExpressionSet)
 trainInd <- 1:16
@@ -86,5 +87,6 @@ predict(clout.nb, sample.ExpressionSet[100:250,-trainInd])
 #
 clout.rf <- MLearn(type~., sample.ExpressionSet[100:250,], randomForestI, trainInd)
 predict(clout.rf, sample.ExpressionSet[100:250,-trainInd])
+} # end of dontrun
 }
 

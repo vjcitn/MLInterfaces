@@ -15,7 +15,7 @@ setMethod("show", "classifierOutput", function(object) {
  if (length(object@fsHistory)>0) cat("history of feature selection in cross-validation available; use fsHistory()\n")
 })
 
-setGeneric("RObject", function(x) standardGeneric("RObject"))
+#setGeneric("RObject", function(x) standardGeneric("RObject"))
 setMethod("RObject", "classifierOutput", function(x) x@RObject)
 
 setGeneric("trainInd", function(x) standardGeneric("trainInd"))
@@ -244,7 +244,7 @@ setMethod("predScores", "classifierOutput", function(x) {
   } else {
     n <- nrow(tescores) + nrow(trainScores(x))
     trainOut <- as.character(x@trainOutcomes)
-    testOut <- as.character(x@testOutcomes)
+    testOut <- as.factor(as.character(x@testOutcomes)) # new march 22 2020 as.factor
     trainInd <- x@trainInd
     testInd <- (seq_len(n))[ -trainInd ]
     ans <-  matrix(0,

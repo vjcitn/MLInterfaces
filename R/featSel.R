@@ -12,7 +12,7 @@ fs.absT = function(N) function(formula, data) {
  respname = names(mf)[respind]
  nuy = length(unique(y))
  if (nuy > 2) warning("number of unique values of response exceeds 2")
- ans = abs( rowttests(t(x), factor(y), tstatOnly=TRUE)[[1]] )
+ ans = abs( genefilter::rowttests(t(x), factor(y), tstatOnly=TRUE)[[1]] )
  names(ans) = colnames(x)
  ans = names( sort(abs(ans),decreasing=TRUE)[seq_len(N)] )
  btick = function(x) paste("`", x, "`", sep="")  # support for nonsyntactic varnames
@@ -32,7 +32,7 @@ fs.probT = function(p) function(formula, data) {
  respname = names(mf)[respind]
  nuy = length(unique(y))
  if (nuy > 2) warning("number of unique values of response exceeds 2")
- ans = abs( rowttests(t(x), factor(y), tstatOnly=TRUE)[[1]] )
+ ans = abs( genefilter::rowttests(t(x), factor(y), tstatOnly=TRUE)[[1]] )
  names(ans) = colnames(x)
  ans = names( ans[ which(ans > quantile(ans, p) ) ] )
  btick = function(x) paste("`", x, "`", sep="")  # support for nonsyntactic varnames

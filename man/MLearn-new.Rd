@@ -340,8 +340,8 @@ kp = sample(1:200, size=120)
 #confuMat(plsda.2,t=.65) ## requires at least 0.65 post error prob to assign outcome
 
 ## examples for predict
-clout <- MLearn(type~., sample.ExpressionSet[100:250,], svmI , 1:16)
-predict(clout, sample.ExpressionSet[100:250,17:26])
+#clout <- MLearn(type~., sample.ExpressionSet[100:250,], svmI , 1:16)
+#predict(clout, sample.ExpressionSet[100:250,17:26])
 
 }
 

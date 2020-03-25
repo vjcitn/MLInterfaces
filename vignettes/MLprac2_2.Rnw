@@ -489,6 +489,7 @@ features available for splitting at nodes.
 <<dorf>>=
 set.seed(124)
 library(randomForest)
+crES$spsex = factor(crES$spsex) # needed 3/2020 as fails with 'do regression?' error
 rf1 = MLearn(spsex~., crES, randomForestI, 1:140 )
 rf1
 cm = confuMat(rf1)

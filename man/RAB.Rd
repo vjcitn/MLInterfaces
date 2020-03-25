@@ -34,6 +34,7 @@ an instance of raboostCont
 
 \examples{
 library(MASS)
+library(rpart)
 data(Pima.tr)
 data(Pima.te)
 Pima.all = rbind(Pima.tr, Pima.te)

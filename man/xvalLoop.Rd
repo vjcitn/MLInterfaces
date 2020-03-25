@@ -1,5 +1,6 @@
 \name{xvalLoop}
 \alias{xvalLoop}
+\alias{xvalLoop,ANY-method}
 \title{Cross-validation in clustered computing environments}
 \description{Use cross-validation in a clustered computing environment}
 \usage{xvalLoop( cluster, ... )}

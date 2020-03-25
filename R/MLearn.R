@@ -30,10 +30,10 @@ setMethod("MLearn",
             tmp = .method@converter( ans, data, trainInd )
             ## add some stuff to the converted representation
             if (!tmp@embeddedCV) {
-              tmp@testOutcomes = teout
-              tmp@trainOutcomes = trout
+              tmp@testOutcomes = factor(teout) # new 3/22/2020 factor()
+              tmp@trainOutcomes = factor(trout)
             }
-            else tmp@testOutcomes = trout # if CV is embedded, the 'training' is 'test'
+            else tmp@testOutcomes = factor(trout) # if CV is embedded, the 'training' is 'test'
             tmp@call = thecall
             tmp@learnerSchema = .method
             tmp@trainInd = trainInd
@@ -201,7 +201,7 @@ setMethod("MLearn",
               teScores <- do.call(rbind,teScores)
               testscores <- teScores[reord,]
             } else {
-              warning("Ignoring testScores of class ", class(teScores[[1]]),
+              message("Ignoring testScores of class ", class(teScores[[1]]),
                       ", expecting vector or matrix.")
               testscores <- NULL
             }
