@@ -1,3 +1,7 @@
+CHANGES IN VERSION 1.67.10
+--------------------------
+o Fix es2df (for R 4.0.0) setting stringsAsFactors = TRUE
+
 CHANGES IN VERSION 1.67.1
 -------------------------
  o rda has been moved to 'Enhances' and its use is conditional its presence <2019-01-05>

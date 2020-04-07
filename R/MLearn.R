@@ -44,9 +44,9 @@ es2df = function(x,keep=NULL) {
 #
 # the keep parameter says which pData vars are kept in
 #
-   if (is.null(keep)) return(data.frame(t(exprs(x)),pData(x)))
+   if (is.null(keep)) return(data.frame(t(exprs(x)),pData(x), stringsAsFactors = TRUE))
    else {
-        tmp = data.frame(t(exprs(x)),pData(x)[[keep]])
+        tmp = data.frame(t(exprs(x)),pData(x)[[keep]], stringsAsFactors = TRUE)
         names(tmp)[ncol(tmp)] = keep
         return(tmp)
         }
