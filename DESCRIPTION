@@ -16,7 +16,8 @@ Imports: gdata, pls, sfsmisc, MASS, rpart, genefilter, fpc, ggvis,
         stats4, tools, grDevices, graphics, stats
 Suggests: class, e1071, ipred, randomForest, gpls, pamr, nnet, ALL,
         hgu95av2.db, som, hu6800.db, lattice, caret (>= 5.07),
-        golubEsets, ada, keggorthology, kernlab, mboost, party, klaR
+        golubEsets, ada, keggorthology, kernlab, mboost, party, klaR,
+	testthat
 Enhances: parallel, rda
 LazyLoad: yes
 biocViews: Classification, Clustering

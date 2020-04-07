@@ -1,6 +1,7 @@
 CHANGES IN VERSION 1.67.10
 --------------------------
 o Fix es2df (for R 4.0.0) setting stringsAsFactors = TRUE
+o Add unit test
 
 CHANGES IN VERSION 1.67.1
 -------------------------
