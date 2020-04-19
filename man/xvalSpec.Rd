@@ -40,7 +40,7 @@ values of \code{niter} and \code{K} in this usage must be the same.
 This redundancy will be removed in a future upgrade.
 
 If the \code{parallel} package is attached and symbol \code{mc_fork} is loaded, cross-validation will
-be distributed to cores using \code{\link[parallel]{mclapply}}.
+be distributed to cores using \code{\link{mclapply}}.
 } % end details
 \value{
 An instance of \code{\linkS4class{classifierOutput}}, with a special

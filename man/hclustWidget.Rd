@@ -32,7 +32,7 @@ lower bound on number of features to use
 data.frame with number of rows equal to nrow(mat), with metadata
 to be displayed in hovering tooltip
 }
-  \item{eset}{instance of \code{\link[Biobase]{ExpressionSet-class}}}
+  \item{eset}{instance of \code{\link{ExpressionSet-class}}}
   \item{infmla}{instance of \code{formula}, with dependent variable
 values obtained in \code{pData(eset)}, and independent variable
 specified as "." or as properly munged elements of \code{featureNames(eset)}.}

@@ -160,7 +160,7 @@ you must explicitly specify centers and algorithm name.}
 } % end list of schemas
 
 If the \code{parallel} package is attached, cross-validation will
-be distributed to cores using \code{\link[parallel]{mclapply}}.
+be distributed to cores using \code{\link{mclapply}}.
 
 } % end details
 \value{
