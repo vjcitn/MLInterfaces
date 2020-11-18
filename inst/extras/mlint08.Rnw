@@ -1,0 +1,662 @@
+
+%
+% NOTE -- ONLY EDIT THE .Rnw FILE!!!  The .tex file is
+% likely to be overwritten.
+%
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage[authoryear,round]{natbib}
+\usepackage{hyperref}
+
+
+\textwidth=6.2in
+\textheight=8.5in
+%\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\Rmethod}[1]{{\texttt{#1}}}
+\newcommand{\Rfunarg}[1]{{\texttt{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+
+\textwidth=6.2in
+
+\bibliographystyle{plainnat} 
+ 
+\begin{document}
+%\setkeys{Gin}{width=0.55\textwidth}
+
+\title{BioC 2008 practical: Machine learning with genome-scale data}
+\author{\copyright 2008 VJ Carey stvjc at channing.harvard.edu}
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+The term \textit{machine learning} refers to a family of
+computational methods for analyzing multivariate datasets.
+Each data point has a vector of \textit{features} in a shared
+\textit{feature space},
+and may have a \textit{class label} from some fixed finite set.
+
+\textit{Supervised learning} refers to processes
+that help articulate rules that map \textit{feature vectors}
+to \textit{class labels}.  The class labels are known and
+function as supervisory information to guide rule construction.
+\textit{Unsupervised learning} refers to processes
+that discover structure in collections of feature
+vectors.  Typically the structure consists of a grouping
+of objects into clusters.
+
+Some basic points to consider at the start:
+\bi
+\item Distinguish predictive modeling from inference
+on model parameters.  Typical work in epidemiology focuses
+on estimation of relative risks, and random samples are not
+required.  Typical work with machine learning tools targets
+estimation (and minimization) of the misclassification rate.
+Representative samples are required for this task.
+\item All prediction or clustering algorithms, like all modeling
+procedures, rely on a choice of distance metric that permits
+quantitative
+evaluation of similarity and dissimilarity among objects.  The
+choice can affect results and there is typically no \textit{a priori}
+basis for selecting the distance function.  A one-minus-correlation
+distance can be very different from euclidean distance for
+a given pair of genes.
+\item ``Two cultures'': model fitters vs. algorithmic predictors.
+If statistical models are correct, parameter estimation based
+on the mass of data can
+yield optimal discriminators (e.g., LDA).  Algorithmic discriminators
+tend to prefer
+to identify boundary cases and downweight the mass of data (e.g., boosting,
+svm).
+\item Different learning tools have different capabilities.
+There is little \textit{a priori} guidance on matching learning algorithms to
+aspects of problems.  While it is convenient to sift through a variety
+of approaches, one must pay a price for the model search.
+\item Data and model/learner visualization are  important, but
+visualization in higher dimensional data structures is hard.
+Dynamic graphics can help; look at ggobi and Rggobi for this.
+\item These notes provide very little mathematical background
+on the methods; see for example Ripley (\textit{Pattern recognition and neural networks},
+1995), Duda, Hart, Stork (\textit{Pattern classification}),
+Hastie, Tibshirani and Friedman (2003,
+\textit{Elements of statistical learning}) for extensive
+background.
+\ei
+
+\section{Data structures}
+
+The representation of genome-scale data has impacts on 
+many aspects of data analysis.  For microarray measures
+of mRNA abundance (expression arrays) we use the \texttt{ExpressionSet}
+to unify data and metadata on a set of arrays.  
+Let $G$ denote the number of genes probed on the array,
+and $N$ denote the number of samples which will be assumed
+independent (familial data structures not directly
+considered).  The key points for an \texttt{ExpressionSet} instance \texttt{X}
+are
+\begin{itemize}
+\item \texttt{exprs(X)} is a $G \times N$ \texttt{matrix} of expression values
+(typically on the log scale)
+\item \texttt{pData(X)} is a $N \times R$ \texttt{data.frame} of
+sample-level variables
+\item  \verb+X$v+ is an $N$-vector of values on the sample-level
+variable named \texttt{v}
+\item \texttt{X[G, S]} is a new \texttt{ExpressionSet} instance
+with genes restricted according to predicate \texttt{G} and
+samples restricted according to predicate \texttt{S}
+\end{itemize}
+
+Our first example
+is the Chiaretti et al. dataset on acute lymphocytic leukemia.
+<<d1,echo=FALSE>>=
+if (!("package:ALL" %in% search())) library(ALL)
+if (!(exists("ALL"))) data(ALL)
+<<d2,eval=FALSE>>=
+library(ALL)
+data(ALL)
+ALL
+@
+We will focus on the molecular classification of leukemia-type
+within B-cell leukemias, and create a subset of B-cell ALL samples
+that are either positive or negative for BCR/ABL gene fusion
+<<lkta>>=
+table(ALL$BT, ALL$mol.biol)
+bALL = ALL[, substr(ALL$BT, 1, 1) == "B"]
+fbALL = bALL[, bALL$mol.biol %in% c("BCR/ABL", "NEG")]
+fbALL$mol.biol = factor(fbALL$mol.biol, levels=c("NEG", "BCR/ABL"))
+fbALL$binFus = 1*(fbALL$mol.biol == "BCR/ABL")
+@
+In the last assignment, we make a 0-1 representation of the mol.biol
+factor.
+
+\section{Logistic regression and linear discriminant analysis}
+
+A standard analysis of a problem
+with a two-class outcome focuses on modeling the
+probability of class membership.  With our
+representation, we consider the probability that a
+sample is positive for BCR/ABL fusion (this event
+is denoted $F=1$, $F$ a binary random variable)  conditional on 
+the level of expression of a selected gene.  A linear logistic
+model takes the form
+\[
+\mbox{logit Pr}(F = 1|x) = \alpha + x\beta
+\]
+
+\subsection{Manual fit of a logistic regression}
+
+This can be fit manually using R as follows.  We use the third
+gene on the array as $x$.
+<<dologi>>=
+lr1 = glm(formula = fbALL$binFus ~ exprs(fbALL)[3, ], family = binomial)
+summary(lr1)
+@
+
+\subsubsection*{Exercises}
+\begin{itemize}
+\item Visualize the class-specific distributions of the modeled gene.
+\item What is the name of the gene used in this analysis?
+\end{itemize}
+
+\subsection{Using MLInterfaces}
+
+\subsubsection{A simple application: single gene logistic regression}
+
+Here we use a generic method that operates on \texttt{ExpressionSet}
+instances and formulae to carry out the same logistic
+regression analysis, but with cross-validation.  In this species
+of cross-validation, the dataset is partitioned into five subsets,
+each of which is formed to have approximately equal representation
+of the outcome classes.
+
+<<doml,keep.source=TRUE>>=
+library(MLInterfaces)
+lr2 = MLearn(mol.biol~., fbALL[3,], glmI.logistic(thresh=.5), 
+   xvalSpec("LOG", 5, balKfold.xvspec(5)), 
+   family=binomial)
+lr2
+@
+
+Notice that the result of this call is not a table of
+coefficients, but an object.  That object has the same
+formal structure for any successful call to \texttt{MLearn}.
+
+We can get the table of coefficients through the following:
+<<lktab>>=
+summary(RObject(RObject(lr2)[[1]]$mlans))
+@
+
+The access path to the coefficients 
+is somewhat convoluted -- two levels of
+storage must be traversed.  At the top level (interior
+call to \texttt{RObject}, applied to \texttt{lr2}), we are looking
+into the result of five cross-validation iterations.  We
+pick the first using \texttt{[[1]]}.  This returns a 
+list.  The element named \texttt{mlans} holds the table of
+coefficients (actually the glm model fit), retrieved using
+the outer call to \texttt{RObject}, rendered using \texttt{summary}.
+
+The \texttt{MLearn} method is tailored to predictive applications.
+In the use of logistic modeling, a threshold is specified in the
+third argument to MLearn.  The predicted probability of fusion for each
+sample is computed according to the fitted model and if it exceeds
+the threshold parameter, the sample is predicted to be in the fusion
+class; otherwise it is predicted to be negative for fusion.
+
+The confusion matrix for the cross-validated
+prediction exercise cross-tabulates
+known class vs predicted class for all samples.  The proportion
+of off-diagonal entries is an estimate of the misclassification rate.
+
+\subsubsection*{Exercises}
+\begin{itemize}
+\item If we relax the threshold for classifying to fusion to 40\%,
+what happens to the misclassification rate for cross-validated,
+single-gene,
+logistic regression-based prediction?
+\end{itemize}
+
+%lr3 = MLearn(mol.biol~., fbALL[3,], glmI.logistic(thresh=.40), 
+%   xvalSpec("LOG", 5, balKfold.xvspec(5)), 
+%   family=binomial)
+
+\subsubsection{Prediction with many genes}
+
+We will now illustrate linear discriminant analysis (LDA).
+We use a collection of genes, denoted $x_i$ to characterize sample $i$,
+and compute the multivariate mean for each class (denoted
+$\mu_F$ and $\mu_N$ for fusion and negative respectively)
+and the common covariance matrix $\Sigma$ for all the observations.
+If $\pi_F$ and $\pi_N$ are the proportions of fusion and negative
+samples in the dataset,
+The classification procedure is to 
+allocate the sample with gene `signature' $x_i$ to class $F$ when
+\[
+LD(x_i) = (\mu_F - \mu_N)^t \Sigma^{-1}(x_i - .5(\mu_F+\mu_N)) > \log(\pi_F/\pi_N).
+\]
+
+For this to be feasible on modest hardware, we need to filter the
+genes in use.  We use genefilter's \texttt{nsFilter} procedure to
+eliminate genes with relatively low variability across samples.
+<<dof,keep.source=TRUE>>=
+library(genefilter)
+ffbALL = nsFilter(fbALL, var.func=var, var.cutoff=.9)
+ffbALL[[2]] # check exclusion events
+ffbALL = ffbALL[[1]] # keep only ExpressionSet
+@
+
+Now we construct a cross-validated linear discriminant analysis
+using all filtered genes.
+<<dold,cache=TRUE>>=
+lda1 = MLearn(mol.biol~., ffbALL, ldaI, xvalSpec("LOG", 5, 
+   balKfold.xvspec(5)))
+<<lklddd>>=
+mm = confuMat(lda1)
+mcr = (sum(mm)-sum(diag(mm)))/sum(mm)
+mcr
+@
+
+Is this a legitimate application?  Is \Sexpr{round(mcr,3)} a good
+estimate of the misclassification rate of the procedure?  Perhaps
+not, because feature selection was conducted outside the cross-validation
+procedure.  The set of genes filtered away will differ from
+iteration to iteration of the cross-validation.  This process
+can be factored into our cross-validation using the \texttt{fsFun}
+parameter of \texttt{xvalSpec}.  Ideally we would apply this
+feature selection process to the full fbALL ExpressionSet but
+on a small computer this seems to cause problems.  We illustrate
+with only 2500 genes:
+
+<<doxv,cache=TRUE>>=
+lda2 = MLearn(mol.biol~., fbALL[1:2500,], ldaI, xvalSpec("LOG", 5, 
+   balKfold.xvspec(5), fsFun=fs.topVariance(.9)))
+<<lkcc>>=
+lda2
+confuMat(lda2)
+length(fsHistory(lda2)[[1]])
+@
+\subsection{Summary}
+\bi
+\item ExpressionSets store assay and sample-level data from microarray
+experiments;
+\item Manual application of standard statistical modeling tools to
+test specific gene effects is feasible, but variation in calling sequence
+and return values reduces efficiency of application and interpretation;
+\item MLInterfaces MLearn supports  direct application of supervised
+learning methods to ExpressionSet instances
+\bi
+\item standard formula interface may refer to any phenoData variable for
+response
+\item learnerSchema instances select the algorithm to be used; we
+looked at glmI.logistic and ldaI
+\item cross-validation is supported through the xvalSpec object
+\item algorithmic feature selection can be embedded in cross-validation
+\ei
+\item MLearn returns a structured object responding to \texttt{confuMat},
+\texttt{RObject}, and, when relevant, \texttt{fsHistory}
+\ei
+
+\section{Some technical details of MLInterfaces}
+\subsection{The signature of MLearn}
+<<lkm>>=
+showMethods("MLearn")
+@
+
+\subsection{Available learnerSchema instances}
+<<lkls>>=
+grep(".*I($|\\.)", ls("package:MLInterfaces"), value=TRUE)
+@
+
+You can add your own schemata for new learning functions.  See the
+vignette MLint\_devel.
+
+\subsection{Tuning}
+
+You can set additional parameters in the ... argument place
+to MLearn.  Eventually a tuningSpec object will be defined to
+control this.
+
+\section{Supervised learning: Additional illustrations}
+
+\subsection{CART}
+
+Decision trees are attractive models for certain investigations.
+If the process under study has a hierarchical structure, so that
+some features decompose the population at a high level, and others
+operate within lower level components, a tree-structured model
+may be useful.  Classification And Regression Trees (CART) denotes
+a family of algorithms that aggressively sift through features
+in a recursive series of splits of the data.  At the first stage,
+all the data live in a root tree node.  All features are dichotomized
+in all possible ways and the node is split using the feature
+that leads to two nodes that are most pure in distribution of
+the class label according to some
+user-selected metric such as the Gini index or the deviance.
+The process recurses in the new nodes.  The tree construction
+proceeds until nodes reach some minimal size, and then it may be
+pruned back.  Details can be found in Ripley, Pattern Recognition and
+Neural Networks, 1995.
+
+<<dorp,cache=TRUE>>=
+rp1 = MLearn(mol.biol~., ffbALL, rpartI, xvalSpec("LOG", 5, 
+   balKfold.xvspec(5)))
+<<dodtrtr>>=
+confuMat(rp1)
+@
+
+Each fit yields an extensive summary.
+<<lks>>=
+summary(RObject(RObject(rp1)[[1]]$mlans))
+@
+
+We have cross-validated and can inspect the tree for each iteration:
+<<dofirp, fig=TRUE>>=
+  tr1 = RObject(RObject(rp1)[[1]]$mlans)
+  plot(tr1, uniform=TRUE, branch=.2, compress=TRUE, margin=.1, main=
+    paste("xval tree", 1))
+  text(tr1, all=TRUE, use.n=TRUE, fancy=TRUE, pretty=TRUE)
+@
+
+<<dofirp2, fig=TRUE>>=
+  tr2 = RObject(RObject(rp1)[[2]]$mlans)
+  plot(tr2, uniform=TRUE, branch=.2, compress=TRUE, margin=.1, main=
+    paste("xval tree", 2))
+  text(tr2, all=TRUE, use.n=TRUE, fancy=TRUE, pretty=TRUE)
+@
+
+\subsubsection*{Exercises}
+\bi
+\item The trees visualized here are not as informative as they
+would be if gene symbols were used for probe sets.
+Alter ffbALL so that the featureNames are symbols and generate
+a better plot.
+
+You could use code like
+<<doadad,eval=FALSE>>=
+X = featureNames(ffbALL)
+library(hgu95av2.db)
+SX = mget(X, hgu95av2SYMBOL)
+any(duplicated(unlist(SX)))
+featureNames(ffbALL) = SSX
+rrp1 = MLearn(mol.biol~., ffbALL, rpartI, xvalSpec("LOG", 5,
+   balKfold.xvspec(5)))
+@
+
+\item Create a deeper set of trees by specifying an option
+defined in rpart.control.  For example, set minsplit=3.
+Use \texttt{plotcp} on the resulting tree objects and interpret.
+\ei
+
+\subsection{Random forests and variable importance assessment}
+
+Leo Breiman extended the tree structured modeling approach
+by integrating random feature and case selection over
+a long sequence of tree fits.  Voting over the tree sequence 
+is used to create the classifier.
+
+According to wikipedia,
+``Each tree is constructed using the following algorithm:
+\bi
+\item
+   Let the number of training cases be N, and the number of variables in the classifier be M.
+\item
+   We are told the number m of input variables to be used to determine the decision at a node of the tree; m should be much less than M.
+\item
+    Choose a training set for this tree by choosing N times with replacement from all N available training cases (i.e. take a bootstrap sample). Use the rest of the cases to estimate the error of the tree, by predicting their classes.
+\item
+    For each node of the tree, randomly choose m variables on which to base the decision at that node. Calculate the best split based on these m variables in the training set.
+
+\item
+    Each tree is fully grown and not pruned (as may be done in constructing a normal tree classifier).
+\ei
+
+This is easy to use with MLearn.  Because of the
+internal resampling, we do not need to cross-validate (unless
+we really want to).
+
+<<sdass>>=
+set.seed(12345)
+<<dorf1,cache=TRUE>>=
+rf1 = MLearn(mol.biol~., ffbALL, randomForestI, xvalSpec("NOTEST"),
+  importance=TRUE)
+<<lkrc>>=
+confuMat(rf1, "train")
+@
+
+The variable importance measure can be rendered as follows:
+<<doimp,fig=TRUE>>=
+par(las=2, mar=c(5,9,5,5))
+plot(getVarImp(rf1, TRUE), plat="hgu95av2", toktype="SYMBOL")
+@
+
+\subsubsection*{Exercises}
+\bi
+\item Generate a textual report on the relative importance
+measures, using \texttt{getVarImp}.
+\item Compare the top genes identified via randomForest
+to those identified via limma.  Comment on the added
+learning provided by the machine learning algorithm.
+\ei
+
+\subsection{Regularized discriminant analysis}
+
+This is an interesting algorithm in which LDA
+is generalized in two directions.  First, the covariance
+matrix of the data is modeled as a linear combination of
+an identity matrix and the sample covariance matrix.
+Second, features are dropped according to their distance from
+sample centroids.  See the 2007 Biostatistics paper of Guo and Tibshirani for
+details.
+
+The code distributed by Guo et al has internal cross-validation
+by which parameters $\alpha \in [0,1]$ (weight on the sample covariance
+matrix, to which $1 - \alpha \times I$ is added to get the
+effective covariance to be used in discriminant computation) and
+$\delta$ (parameter dictating how features are dropped depending
+on their distance from data centroids) are selected.  We therefore
+use RDA in two stages, first to inspect the results of internal
+cross-validation, and then to compute the predictors for the
+`optimal' $\alpha$ and $\delta$.  (There are typically a range
+of attractive values for these parameters.)
+
+<<doadasd>>=
+set.seed(12345)
+<<do1,cache=TRUE>>=
+rda1 = MLearn(mol.biol~., ffbALL, rdacvI, xvalSpec("NOTEST"))
+@
+We now retrieve the summary of cross-validation results:
+<<do2>>=
+attr(RObject(rda1), "xvalAns")
+@
+We see that values of $\alpha$ around .11 and $\delta$ around .33
+lead to small numbers of errors in cross-validation.  Thus:
+<<do3>>=
+rda2 = MLearn(mol.biol~., ffbALL, rdaI, xvalSpec("NOTEST"), alpha=.11, delta=.333)
+confuMat(rda2, "train")
+@
+\subsubsection*{Exercises}
+\bi
+\item There is a problem with the rendering of the confusion
+matrix above.  Describe how to avoid it.
+\item Obtain the list of `retained genes' by inspecting the rda2 object.
+Compare to limma top table.
+\ei
+
+
+\subsection{Support vector machine}
+
+An important variation on LDA is the support vector machine (SVM)
+algorithm.  The basic ideas can be gleaned from a paper by
+Kristin Bennett to be distributed at the course.
+
+<<dosv>>=
+svm1 = MLearn(mol.biol~., ffbALL, svmI, 
+  xvalSpec("LOG", 5, balKfold.xvspec(5)), kernel="linear")
+confuMat(svm1)
+@
+
+\subsubsection*{Exercises}
+\bi
+\item Examine the \texttt{tune} infrastructure of package e1071
+and consider whether a selection of parameters for tuning
+the svm can improve performance in this case.  To use
+tune you will have to extract response and predictor
+data and convert to appropriate formats.
+\ei
+
+\subsection{Boosting}
+
+Random forests uses an ensemble of trees to generate
+predictions; boosting uses very simple trees generated
+along a sequence of data reweighting steps.  At each iteration,
+data that are easy to classify are downweighted.  We use the
+implementation in adaboost package; there are others.
+
+This seems to be a very intensive algorithm and we run it
+for a very short while for feasibility.  You may examine the
+effects of reducing the feature set.
+
+<<doada,cache=TRUE>>=
+ada1 = MLearn(mol.biol~., ffbALL, adaI, 1:40, type="discrete",
+  iter=20)
+confuMat(ada1)
+@
+
+\section{Unsupervised learning in brief}
+
+Unsupervised learning occurs in the absence of class labels.
+In essence, one is trying to learn both the class labels
+and the rules for attaching them to objects yet unseen.
+
+Cluster analysis is widely used, is propagated through
+heatmap displays, and has substantial conceptual defects.
+We will not discuss it unless there is extra time.
+
+\subsection{PCA and biplots}
+
+To discuss principal components and dimension reduction, we
+use a simpler data set: the crabs data set in the MASS package.
+Consider the following display:
+
+<<doap,fig=TRUE>>=
+pairs(crabs[,-c(1:3)], col=ifelse(crabs$sp=="B", "blue", "orange"))
+@
+
+Various crab body measurements are plotted against each other.
+Clearly there are high correlations between certain variables
+and it would be useful to focus on measures that are
+independently informative on the relationship between
+crab size and species.  Such independently informative
+measures can be constructed using linear combinations of the
+raw measurements.
+
+\subsubsection{PCA defined and illustrated}
+
+Principal components analysis transforms the multivariate
+data X into a new coordinate system.  If the original variables
+are X1, \ldots, Xp, then the variables in the new representation
+are denoted PC1, \ldots, PCp.  These new variables have
+the properties that PC1 is the linear combination of the X
+having maximal variance, PC2 is the variance-maximizing linear combination of
+residuals of X after projecting on PC1, and so on.
+If most of the variation in $X_{n \times p}$ can be captured in
+a low dimensional linear subspace of the space spanned
+by the columns of $X$, scatterplots of
+the first few principal
+components will depict this.
+
+Formally, we can compute the PC using the singular value decomposition of
+$X$, in which $X = UDV^t$, where $U_{n \times p}$ and $V_{p \times p}$
+are orthonormal, and $D$ is a diagonal matrix of $p$ nonnegative
+singular values.  The principal components transformation is
+$XV = UD$, and if $D$ is structured so that $D_{ii} \geq D_{jj}$ whenever
+$i > j$, then column $i$ of $XV$ is PCi.  Note also that $D_{ii} =
+\sqrt{n-1}\mbox{SD}$ PCi.
+
+<<dopc>>=
+library(MASS)
+data(crabs)
+pcs = prcomp( crabs[,-c(1:3)] )
+<<lkscr,fig=TRUE>>=
+plot(pcs)
+<<lkpc, fig=TRUE>>=
+pairs(pcs$x, col=ifelse(crabs$sp=="B", "blue", "orange"))
+@
+
+\subsubsection{Biplots: superimposing samples and variables after
+dimension reduction}
+
+The biplot shows the data in PC space and also shows the
+relative contributions of the original variables in composing
+the transformation.
+
+<<dobi,fig=TRUE>>=
+biplot(pcs, choices=2:3)
+@
+
+
+In addition to the sample representation in PC1-PC2,
+we have a representation of the original variables
+and their roles in defining the principal components
+transformation.  The right-hand and top axes measure
+the first and second components of the eigenvectors
+corresponding to the original variables.
+
+A formal definition of the biplot procedure is given in
+Venables and Ripley, and is worth reviewing.  Rows of $X$ are
+observations and columns are variables.  A rank-2 approximation
+to $X$ is obtained via singular value decomposition, setting
+all but the largest two singular values to zero.
+Now
+\[
+X \approx [u_1 u_2] \left[ \begin{array}{cc}
+  \lambda_1 & 0 \\
+  0 & \lambda_2
+ \end{array}
+     \right] \left[
+   \begin{array}{c} v_1^t \\ v_2^t \end{array} \right] = GH^t
+\]
+and various approaches can
+be entertained for absorption of the eigenvalues $\lambda_i$ into $G$ and $H$.
+A two-parameter system for doing this is
+\[
+G = n^{\alpha/2}
+ [u_1 u_2] \left[ \begin{array}{cc}
+  \lambda_1 & 0 \\
+  0 & \lambda_2
+ \end{array}
+     \right]^{1-\theta}~,~~~
+H = n^{\alpha/2}
+ [v_1 v_2] \left[ \begin{array}{cc}
+  \lambda_1 & 0 \\
+  0 & \lambda_2
+ \end{array}
+     \right]^{\theta}.
+\]
+The ``principal component biplot'' sets $\alpha = \theta = 1$,
+and consists in plotting rows of $G$ and $H$ with distinguished
+symbols.  Euclidean distances between rows of $G$ represent
+Mahalanobis distances between observations; inner products betwen
+rows of $H$ represent covariances between variables.
+
+\subsubsection*{Exercise}
+Create a  biplot using the gene expression data from ALL,
+focusing on genes found to be predictive by randomForests.
+Interpret.
+
+\end{document}

@@ -1,0 +1,98 @@
+CHANGES IN VERSION 1.67.10
+--------------------------
+o Fix es2df (for R 4.0.0) setting stringsAsFactors = TRUE
+o Add unit test
+
+CHANGES IN VERSION 1.67.1
+-------------------------
+ o rda has been moved to 'Enhances' and its use is conditional its presence <2019-01-05>
+
+CHANGES IN VERSION 1.59.2
+-------------------------
+ o Fix warning stemming from base::seq_len in
+   MLInterfaces:::MLIConverter.svm <2018-04-12 Thu>
+ o Ammend xvalSpec man page <2018-04-12 Thu>
+
+CHANGES IN VERSION 1.59.1
+-------------------------
+ o Accommodate new points3d syntax in threejs::scatterplot3d for plspinHcube <2018-01-20 Sat>
+ o remove references to rgl, it is not loading on MacOS and threejs seems to suffice
+
+CHANGES IN VERSION 1.51.1
+-------------------------
+ o Suggest rather than import rgl <2016-08-17 Wed>
+ 
+CHANGES IN VERSION 1.49.8
+-------------------------
+ o Enable learnerIn3D customisation <2015-07-28 Tue>
+
+CHANGES IN VERSION 1.49.7
+-------------------------
+ o fix proper asNA0 propagation in performance analytics functions
+   (implemented 2014-10-16 Thu, commited on 2015-07-28 Tue)
+
+CHANGES IN VERSION 1.49.1
+-------------------------
+ o add hclustWidget
+
+CHANGES IN VERSION 1.41.3
+-------------------------
+ o Fix codoc mismatch [2014-08-29 Fri]
+
+CHANGES IN VERSION 1.41.2
+-------------------------
+ o performance analytics has new naAs0 argument [2014-07-04 Fri] 
+ o cleaning up imports/depends/suggests as reported by check with R
+   3.2 [2014-08-15 Fri]
+ 
+CHANGES IN VERSION 1.41.1
+-------------------------
+ o new peformance analytics functions (lgatto) <2013-04-30 Tue>
+
+CHANGES IN VERSION 1.41.0
+-------------------------
+ o bump for Bioc devel 2.13 
+
+CHANGES IN VERSION 1.40.0
+-------------------------
+ o bump for Bioc stable 2.12 
+
+CHANGES IN VERSION 1.39.5
+-------------------------
+ o ksvmI test/trainScores are have now rownames. 
+   Resulted in error in predScores. <2013-03-12 Tue>
+
+CHANGES IN VERSION 1.39.4
+-------------------------
+ o plsda prediction returns prob matrix instead of 
+   array of [, , 1] dims (lgatto) <2013-03-09 Sat>
+
+CHANGES IN VERSION 1.39.3
+-------------------------
+ o fixed predScores (lgatto) <2013-03-01 Fri>
+
+CHANGES IN VERSION 1.39.2
+-------------------------
+ o macroF1 fix ans with na.rm
+ o fixed macro F1 score (lgatto) <2013-01-18 Fri>
+
+CHANGES IN VERSION 1.39.2
+-------------------------
+ o fixed macro F1 score (lgatto) <2013-01-18 Fri>
+
+CHANGES IN VERSION 1.39.1
+-------------------------
+ o not scaling kmeans' partition in partPlot (lgatto) <2012-11-10 Sat>
+
+CHANGES IN VERSION 1.37.1
+-------------------------
+ o added NEWS file (lgatto) <2012-04-02 Mon>
+ o renamed 'predScores' to 'predScore' and 
+   new 'predScores' method that returns the full 
+   prediction score matrix (lgatto) <2012-04-02 Mon>
+ o remove ununsed t argument for predScore (lgatto) <2012-04-02 Mon>
+ o changed maxit to maxiter in RAB4es and decr to decreasing 
+   in fs.absT (partial argument matching note during checking) 
+   (lgatto) <2012-04-02 Mon>
+ o fixed predScores <2012-04-03 Tue>
+
