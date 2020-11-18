@@ -98,11 +98,11 @@ nnetI = makeLearnerSchema("nnet", "nnet",
 baggingI = makeLearnerSchema("ipred", "bagging",
   standardMLIConverter)
 
-rdacvI = makeLearnerSchema("MLInterfaces", "rdacvML",
-  standardMLIConverter)
-
-rdaI = makeLearnerSchema("MLInterfaces", "rdaML",
-  standardMLIConverter)
+#rdacvI = makeLearnerSchema("MLInterfaces", "rdacvML",
+#  standardMLIConverter)
+#
+#rdaI = makeLearnerSchema("MLInterfaces", "rdaML",
+#  standardMLIConverter)
 
 sldaI = makeLearnerSchema("ipred", "slda",
   MLIConverter.slda)

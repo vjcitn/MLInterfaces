@@ -6,10 +6,12 @@ setMethod("MLearn",
             ## find software
             pname = .method@packageName
             fname = .method@mlFunName
+            requireNamespace(pname)
             ## create the requested function
             lfun = try(do.call("::", list(pname, fname)), silent=TRUE)
 	    if (inherits(lfun, "try-error"))
-            lfun = try(do.call(":::", list(pname, fname)), silent=TRUE) # deal with rdacvML
+                lfun = try(do.call(":::", list(pname, fname)), silent=TRUE) # deal with rdacvML
+            if (inherits(lfun, "try-error")) stop(paste("cannot acquire learner function for function", fname, "in package", pname))
             ## build test and train subsets
             if (length(trainInd) != nrow(data))
               tedata = gdata::drop.levels(data[-trainInd,])

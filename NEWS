@@ -1,3 +1,8 @@
+CHANGES IN VERSION 1.71.1
+--------------------------
+o rda is defunct and all references are removed
+o bug in hclustWidget forbade use of more features than samples -- this is fixed
+
 CHANGES IN VERSION 1.67.10
 --------------------------
 o Fix es2df (for R 4.0.0) setting stringsAsFactors = TRUE

@@ -37,12 +37,8 @@
 \alias{MLearn,formula,ExpressionSet,learnerSchema,xvalSpec-method}
 \alias{MLearn,formula,data.frame,clusteringSchema,ANY-method}
 \alias{plotXvalRDA}
-\alias{rdacvI}
-\alias{rdaI}
 \alias{BgbmI}
 \alias{gbm2}
-\alias{rdaML}
-\alias{rdacvML}
 \alias{hclustI}
 \alias{kmeansI}
 \alias{pamI}
@@ -138,20 +134,6 @@ parameters.}
 \item{naiveBayesI}{\link[e1071]{naiveBayes}}
 \item{baggingI}{\link[ipred]{bagging}}
 \item{sldaI}{\link[ipred]{slda}}
-\item{rdaI}{[1/2020 -- rda dropped from CRAN; install from archive to use this function.] -- you must supply the alpha and delta parameters to
-use this.  Typically cross-validation is used to select these.  See \code{rdacvI} below.}
-\item{rdacvI}{This interface is complicated.  The typical
-use includes cross-validation internal to the rda.cv function.  That process
-searches a tuning parameter space and delivers an ordering on parameters.
-The interface selects the parameters by looking at all parameter
-configurations achieving the smallest min+1SE cv.error estimate, and taking
-the one among them that employed the -most- features (agnosticism).
-A final run of rda is then conducted with the tuning parameters set at
-that 'optimal' choice.  The bridge code can be modified to facilitate
-alternative choices of the parameters in use.  \code{plotXvalRDA}
-is an interface to the plot method for objects of class rdacv defined in
-package rda.  You can use xvalSpec("NOTEST") with this procedure to
-use all the samples to build the discriminator.}
 \item{ksvmI}{\link[kernlab]{ksvm}}
 \item{hclustI(distMethod, agglomMethod)}{\link[stats]{hclust} --
 you must explicitly specify distance and agglomeration procedure.}
@@ -280,7 +262,7 @@ g1 = MLearn(ALL.AML~. , litg, nnetI,
    fsFun=fs.probT(.75)), size=3, decay=.01, trace=FALSE )
 confuMat(g1)
 #
-# illustrate rda.cv interface from package rda (requiring local bridge)
+# computations related to ALL that were used for rda and may be used elsewhere
 #
 library(ALL)
 data(ALL)
@@ -298,14 +280,6 @@ mads = apply(exprs(all2),1,mad)
 kp = which(mads>1)  # get around 250 genes
 vall2 = all2[kp, ]
 vall2$mol.biol = factor(vall2$mol.biol) # drop unused levels
-
-if (requireNamespace("rda", quietly=TRUE)) {
- library("rda")
- r1 = MLearn(mol.biol~., vall2, MLInterfaces:::rdacvI, 1:40)
- confuMat(r1)
- RObject(r1)
- MLInterfaces:::plotXvalRDA(r1)  # special interface to plots of parameter space
-}
 
 # illustrate clustering support
 

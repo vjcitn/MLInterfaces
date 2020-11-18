@@ -13,7 +13,7 @@ hclustWidget = function(mat, featureName="feature",
             column(2, actionButton("btnSend", "Stop widget"))),
   fluidRow(
    column(2,  numericInput("ngenes", label = paste0("N ", featureName, "s"), 
-     minfeats, min = minfeats, max = nrow(mat))),
+     minfeats, min = minfeats, max = ncol(mat))),
    column(2,  selectInput("distmeth", label = "Distance method:",
                choices = c("euclidean", "maximum", "manhattan",
                "binary"), selected = "euclidean")),
@@ -24,13 +24,13 @@ hclustWidget = function(mat, featureName="feature",
    column(2,  numericInput("numclus", label = "K:", 2, min = 1, max = nrow(mat)/2))
           ),
   fluidRow(column(7, plotOutput("tree"))),
-  fluidRow(column(7, ggvisOutput("pcp")))
+  fluidRow(column(7, ggvis::ggvisOutput("pcp")))
  ), server= function(input, output, session) {
     output$title <- renderText(title)
     output$tree <- renderPlot({
 dm = dist(mat[,seq_len(input$ngenes)], method=input$distmeth)
 sink(tempfile())
-cb <- clusterboot(dm, clustermethod=hclustCBI, method=input$fusemeth, k=input$numclus, showplots=FALSE, scaling=FALSE)
+cb <- fpc::clusterboot(dm, clustermethod=hclustCBI, method=input$fusemeth, k=input$numclus, showplots=FALSE, scaling=FALSE)
 sink(NULL)
       dend = hclust( dm, method=input$fusemeth )
       par(mar=c(3,3,3,1))
@@ -56,10 +56,10 @@ sink(NULL)
          if ((nrow(auxdf) == nrow(pcdf))) pcdf = cbind(pcdf, auxdf)
            else message("nrow(auxdf) != nrow(mat), ignoring auxdf")
          }
-      pcdf %>% ggvis(~PC1, ~PC2, key := ~rowid, fill = ~assigned) %>% layer_points() %>%
-               add_tooltip(all_values, "hover") 
+      pcdf %>% ggvis::ggvis(~PC1, ~PC2, key := ~rowid, fill = ~assigned) %>% ggvis::layer_points() %>%
+               ggvis::add_tooltip(all_values, "hover") 
       }) 
-      P1 %>% bind_shiny("pcp")
+      P1 %>% ggvis::bind_shiny("pcp")
       observe({
          if (input$btnSend > 0)
             isolate({

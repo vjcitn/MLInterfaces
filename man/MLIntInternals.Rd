@@ -60,13 +60,6 @@
 \alias{predict.knn.cv2}
 \alias{predict.knn2}
 \alias{predict.lvq}
-\alias{predict.rdaML}
-\alias{predict.rdacvML}
-\alias{print.rdaML}
-\alias{print.rdacvML}
-\alias{rda.xvalAns}
-\alias{rdaCV}
-\alias{rdaFixed}
 \alias{x}
 
 

@@ -660,44 +660,8 @@ confuMat(rfALL)
 @
 
 None of these are extremely impressive, but the problem may just
-be very hard.  An interesting proposal is RDA, regularized
-discriminant analysis (package rda, Guo, Hastie, Tibshirani 2007
-Biostatistics).  This algorithm recognizes the fact that
-covariance matrix estimation in high dimensional data is
-very inaccurate, so the estimator is shrunk towards the identity.
-We have a rudimentary interface, in which the
-key parameters are chosen by native cross-validation (in rda.cv)
-and then applied once to get the final object.
-<<lkrda,results=hide,cache=FALSE>>=
-if (requireNamespace("rda", quietly=TRUE)) {
-library("rda")
-set.seed(1234)
-rdaALL = MLearn( mol.biol~., fusk, MLInterfaces:::rdacvI, 1:40 )
-rdaALL
-confuMat(rdaALL)
-}
-@
-A by-product of the algorithm is a set of retained genes that
-were found to play a role in discrimination.
-This can be established as follows:
-<<getgl>>=
-if (requireNamespace("rda", quietly=TRUE)) {
-library(hgu95av2.db)
-psid = RObject(rdaALL)$keptFeatures
-psid = gsub("^X", "", psid) # make.names is run inopportunely
-mget(psid, hgu95av2GENENAME, ifnotfound=NA)[1:5]
-}
-@
+be very hard.  
 
-\addtocounter{mlq}{1}
-\bi
-\item \textit{Question \MLQ.}  How can we assess the relative impacts
-of regularization (expanding the covariance model beyond that of
-DLDA, which was shown above
-to do poorly, but without relying
-on the full covariance) and implicit feature selection
-conducted in RDA?
-\ei
 
 \subsubsection{Gene set appraisal}
 

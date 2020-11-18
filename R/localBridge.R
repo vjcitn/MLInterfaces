@@ -126,112 +126,112 @@ predict.dlda2 = function(object, newdata, ...) {
  sfsmisc::diagDA( object$traindat, as.numeric(object$traincl), newdata, ... )
 }
 
-# -- rdacvML -- bridges to rda::rda.cv which requires a run of rda
-
-rdaCV = function( formula, data, ... ) {
- if (!requireNamespace("rda")) stop("install package rda to use this function")
- passed = list(...)
- if ("genelist" %in% names(passed)) stop("please don't supply genelist parameter.")
- # data input to rda needs to be GxN
- x = model.matrix(formula, data)
- if ("(Intercept)" %in% colnames(x))
-   x = x[, -which(colnames(x) %in% "(Intercept)")]
- x = t(x)
- mf = model.frame(formula, data)
- resp = as.numeric(factor(model.response(mf)))
- run1 = rda::rda( x, resp, ... )
- rda::rda.cv( run1, x, resp )
-}
-
-rdaFixed = function( formula, data, alpha, delta, ... ) {
- if (!requireNamespace("rda")) stop("install package rda to use this function")
- passed = list(...)
- if ("genelist" %in% names(passed)) stop("please don't supply genelist parameter.")
- # data input to rda needs to be GxN
- x = model.matrix(formula, data)
- if ("(Intercept)" %in% colnames(x))
-   x = x[, -which(colnames(x) %in% "(Intercept)")]
- x = t(x)
- featureNames = rownames(x)
- mf = model.frame(formula, data)
- resp = as.numeric(resp.fac <- factor(model.response(mf)))
- finalFit=rda::rda( x, resp, genelist=TRUE, alpha=alpha, delta=delta, ... )
- list(finalFit=finalFit, x=x, resp.num=resp, resp.fac=resp.fac, featureNames=featureNames,
-    keptFeatures=featureNames[ which(apply(finalFit$gene.list,3,function(x)x)==1) ])
-}
-
-rdacvML = function(formula, data, ...) {
- if (!requireNamespace("rda")) stop("install package rda to use this function")
- run1 = rdaCV( formula, data, ... )
- perf.1se = cverrs(run1)$one.se.pos
- del2keep = which.max(perf.1se[,2])
- parms2keep = perf.1se[del2keep,]
- alp = run1$alpha[parms2keep[1]]
- del = run1$delta[parms2keep[2]]
- fit = rdaFixed( formula, data, alpha=alp, delta=del, ... )
- class(fit) = "rdacvML"
- attr(fit, "xvalAns") = run1
- fit
-}
-
-rdaML = function(formula, data, ...) {
- if (!requireNamespace("rda")) stop("install package rda to use this function")
- dots = list(...)
- nd = names(dots)
- if (!(all(c("alpha", "delta") %in% nd))) stop("alpha and delta must be supplied with rdaI")
- fit = rdaFixed( formula, data, ... )
- class(fit) = "rdaML"
- fit
-}
-
-print.rdaML = function(x, ...) {
- cat("rdaML S3 instance. components:\n")
- print(names(x))
-}
-
-print.rdacvML = function(x, ...) {
- cat("rdacvML S3 instance. components:\n")
- print(names(x))
- cat("---\n")
- cat("elements of finalFit:\n")
- print(names(x$finalFit))
- cat("---\n") 
- cat("the rda.cv result is in the xvalAns attribute of the main object.\n")
-}
-
-rda.xvalAns = function(cfo) {
- if (!is(cfo, "classifierOutput")) stop("works for classifierOutput instance from MLearn/rdacvI")
- attr( RObject(cfo), "xvalAns" )
-}
-
-plotXvalRDA = function(cfo, ...) {
- if (!is(cfo, "classifierOutput")) stop("works for classifierOutput instance from MLearn/rdacvI")
- plot( rda.xvalAns(cfo), ... )
-}
-
-predict.rdacvML = function(object, newdata, ...) {
- if (!requireNamespace("rda")) stop("install package rda to use this function")
- newd = data.matrix(newdata)
- fnames = rownames(object$x)
- newd = newd[, fnames]
- if (any(dim(newd) == 0))
-     inds =predict(object$finalFit, object$x, object$resp.num, xnew=object$x)
- else inds = try(predict(object$finalFit, object$x, object$resp.num, xnew=t(newd)))
- factor(levels(object$resp.fac)[inds])
-}
-
-predict.rdaML = function(object, newdata, ...) {
- if (!requireNamespace("rda")) stop("install package rda to use this function")
- newd = data.matrix(newdata)
- fnames = rownames(object$x)
- newd = newd[, fnames]
- if (any(dim(newd) == 0))
-     inds =predict(object$finalFit, object$x, object$resp.num, xnew=object$x)
- else inds = try(predict(object$finalFit, object$x, object$resp.num, xnew=t(newd)))
- factor(levels(object$resp.fac)[inds])
-}
-
-
+# # -- rdacvML -- bridges to rda::rda.cv which requires a run of rda
+# 
+# rdaCV = function( formula, data, ... ) {
+#  if (!requireNamespace("rda")) stop("install package rda to use this function")
+#  passed = list(...)
+#  if ("genelist" %in% names(passed)) stop("please don't supply genelist parameter.")
+#  # data input to rda needs to be GxN
+#  x = model.matrix(formula, data)
+#  if ("(Intercept)" %in% colnames(x))
+#    x = x[, -which(colnames(x) %in% "(Intercept)")]
+#  x = t(x)
+#  mf = model.frame(formula, data)
+#  resp = as.numeric(factor(model.response(mf)))
+#  run1 = rda::rda( x, resp, ... )
+#  rda::rda.cv( run1, x, resp )
+# }
+# 
+# rdaFixed = function( formula, data, alpha, delta, ... ) {
+#  if (!requireNamespace("rda")) stop("install package rda to use this function")
+#  passed = list(...)
+#  if ("genelist" %in% names(passed)) stop("please don't supply genelist parameter.")
+#  # data input to rda needs to be GxN
+#  x = model.matrix(formula, data)
+#  if ("(Intercept)" %in% colnames(x))
+#    x = x[, -which(colnames(x) %in% "(Intercept)")]
+#  x = t(x)
+#  featureNames = rownames(x)
+#  mf = model.frame(formula, data)
+#  resp = as.numeric(resp.fac <- factor(model.response(mf)))
+#  finalFit=rda::rda( x, resp, genelist=TRUE, alpha=alpha, delta=delta, ... )
+#  list(finalFit=finalFit, x=x, resp.num=resp, resp.fac=resp.fac, featureNames=featureNames,
+#     keptFeatures=featureNames[ which(apply(finalFit$gene.list,3,function(x)x)==1) ])
+# }
+# 
+# rdacvML = function(formula, data, ...) {
+#  if (!requireNamespace("rda")) stop("install package rda to use this function")
+#  run1 = rdaCV( formula, data, ... )
+#  perf.1se = cverrs(run1)$one.se.pos
+#  del2keep = which.max(perf.1se[,2])
+#  parms2keep = perf.1se[del2keep,]
+#  alp = run1$alpha[parms2keep[1]]
+#  del = run1$delta[parms2keep[2]]
+#  fit = rdaFixed( formula, data, alpha=alp, delta=del, ... )
+#  class(fit) = "rdacvML"
+#  attr(fit, "xvalAns") = run1
+#  fit
+# }
+# 
+# rdaML = function(formula, data, ...) {
+#  if (!requireNamespace("rda")) stop("install package rda to use this function")
+#  dots = list(...)
+#  nd = names(dots)
+#  if (!(all(c("alpha", "delta") %in% nd))) stop("alpha and delta must be supplied with rdaI")
+#  fit = rdaFixed( formula, data, ... )
+#  class(fit) = "rdaML"
+#  fit
+# }
+# 
+# print.rdaML = function(x, ...) {
+#  cat("rdaML S3 instance. components:\n")
+#  print(names(x))
+# }
+# 
+# print.rdacvML = function(x, ...) {
+#  cat("rdacvML S3 instance. components:\n")
+#  print(names(x))
+#  cat("---\n")
+#  cat("elements of finalFit:\n")
+#  print(names(x$finalFit))
+#  cat("---\n") 
+#  cat("the rda.cv result is in the xvalAns attribute of the main object.\n")
+# }
+# 
+# rda.xvalAns = function(cfo) {
+#  if (!is(cfo, "classifierOutput")) stop("works for classifierOutput instance from MLearn/rdacvI")
+#  attr( RObject(cfo), "xvalAns" )
+# }
+# 
+# plotXvalRDA = function(cfo, ...) {
+#  if (!is(cfo, "classifierOutput")) stop("works for classifierOutput instance from MLearn/rdacvI")
+#  plot( rda.xvalAns(cfo), ... )
+# }
+# 
+# predict.rdacvML = function(object, newdata, ...) {
+#  if (!requireNamespace("rda")) stop("install package rda to use this function")
+#  newd = data.matrix(newdata)
+#  fnames = rownames(object$x)
+#  newd = newd[, fnames]
+#  if (any(dim(newd) == 0))
+#      inds =predict(object$finalFit, object$x, object$resp.num, xnew=object$x)
+#  else inds = try(predict(object$finalFit, object$x, object$resp.num, xnew=t(newd)))
+#  factor(levels(object$resp.fac)[inds])
+# }
+# 
+# predict.rdaML = function(object, newdata, ...) {
+#  if (!requireNamespace("rda")) stop("install package rda to use this function")
+#  newd = data.matrix(newdata)
+#  fnames = rownames(object$x)
+#  newd = newd[, fnames]
+#  if (any(dim(newd) == 0))
+#      inds =predict(object$finalFit, object$x, object$resp.num, xnew=object$x)
+#  else inds = try(predict(object$finalFit, object$x, object$resp.num, xnew=t(newd)))
+#  factor(levels(object$resp.fac)[inds])
+# }
+# 
+# 
 
 cverrs = function (x, type = c("both", "error", "gene"), nice = FALSE, 
     ...) 
