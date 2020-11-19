@@ -128,7 +128,7 @@ plspinHcube = function(insbwidth=4) {
 #       thecolors = palette(rainbow(nclass))[cur@gridPredictions]
      #  print(table(cur@gridPredictions))
      #  print(class(cur@gridPredictions))
-       thecolors = colorRampPalette(brewer.pal(8,"Set2"))(nclass)[as.numeric(cur@gridPredictions)]
+       thecolors = colorRampPalette(RColorBrewer::brewer.pal(8,"Set2"))(nclass)[as.numeric(cur@gridPredictions)]
        labs = as.character(cur@gridPredictions)
        obj = scatterplot3js( x = proj[,as.numeric(input$dim1)], 
                y = proj[,as.numeric(input$dim2)], 
@@ -275,7 +275,7 @@ plspinDF = function(dataframe, insbwidth=4) {
 #       thecolors = palette(rainbow(nclass))[cur@gridPredictions]
      #  print(table(cur@gridPredictions))
      #  print(class(cur@gridPredictions))
-       thecolors = colorRampPalette(brewer.pal(8,"Set2"))(nclass)[as.numeric(cur@gridPredictions)]
+       thecolors = colorRampPalette(RColorBrewer::brewer.pal(8,"Set2"))(nclass)[as.numeric(cur@gridPredictions)]
        labs = as.character(cur@gridPredictions)
        obj = scatterplot3js( x = proj[,as.numeric(input$dim1)], 
                y = proj[,as.numeric(input$dim2)], 

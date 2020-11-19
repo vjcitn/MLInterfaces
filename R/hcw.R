@@ -30,7 +30,7 @@ hclustWidget = function(mat, featureName="feature",
     output$tree <- renderPlot({
 dm = dist(mat[,seq_len(input$ngenes)], method=input$distmeth)
 sink(tempfile())
-cb <- fpc::clusterboot(dm, clustermethod=hclustCBI, method=input$fusemeth, k=input$numclus, showplots=FALSE, scaling=FALSE)
+cb <- fpc::clusterboot(dm, clustermethod=fpc::hclustCBI, method=input$fusemeth, k=input$numclus, showplots=FALSE, scaling=FALSE)
 sink(NULL)
       dend = hclust( dm, method=input$fusemeth )
       par(mar=c(3,3,3,1))

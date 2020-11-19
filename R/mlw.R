@@ -2,7 +2,7 @@
 planarPlot2 = function (clo, eset, classifLab, ...) 
 {
     requireNamespace("RColorBrewer")
-    pal <- brewer.pal("Set2", n = 8)
+    pal <- RColorBrewer::brewer.pal("Set2", n = 8)
     ff <- getGrid(eset)
     if (clo@learnerSchema@mlFunName %in% c("nnet", "rpart")) 
         ps <- predict(RObject(clo), newdata = ff, type = "class")
@@ -96,7 +96,7 @@ totext = function(x) {
     tf = tempfile()
     sink(tf)
     print(x)
-    hwrite(matrix(readLines(tf), ncol=1))
+    hwriter::hwrite(matrix(readLines(tf), ncol=1))
 }
 
 tize = function (x) 
@@ -112,7 +112,7 @@ tize = function (x)
     sink(tf)
     print(RObject(x))
     rl = readLines(tf)
-    hwrite(matrix(rl[seq_len(min(10, length(rl)))], ncol=1), byrow=TRUE)
+    hwriter::hwrite(matrix(rl[seq_len(min(10, length(rl)))], ncol=1), byrow=TRUE)
 }
 
    ans = reactive({ 
