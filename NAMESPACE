@@ -10,6 +10,7 @@ exportPattern("..*")
              "median", "model.frame", "model.matrix", "model.response",
              "na.fail", "prcomp", "predict", "quantile", "terms", "var")
   importFrom("magrittr", "%>%")
+  import(SummarizedExperiment)
 
 #import("methods")
 #import("tools")
