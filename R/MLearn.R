@@ -48,8 +48,21 @@ es2df = function(x,keep=NULL) {
 #
    if (is.null(keep)) return(data.frame(t(exprs(x)),pData(x), stringsAsFactors = TRUE))
    else {
+	print(keep)
         tmp = data.frame(t(exprs(x)),pData(x)[[keep]], stringsAsFactors = TRUE)
-        names(tmp)[ncol(tmp)] = keep
+        names(tmp)[ncol(tmp)] = keep # the assumption is that there is a single response in formula
+        return(tmp)
+        }
+}
+
+se2df = function(x,keep=NULL,assayind=1L) {
+#
+# the keep parameter says which colData vars are kept in
+#
+   if (is.null(keep)) return(data.frame(t(assays(x, assayind)),colData(x), stringsAsFactors = TRUE))
+   else {
+        tmp = data.frame(t(assays(x, assayind)),colData(x)[[keep]], stringsAsFactors = TRUE)
+        names(tmp)[ncol(tmp)] = keep  # the assumption is that there is a single response in formula
         return(tmp)
         }
 }
@@ -60,7 +73,21 @@ setMethod("MLearn", c("formula", "ExpressionSet", "learnerSchema", "numeric" ),
 # the keep setting below says just keep the response variable
 # from pData
 #
-        data = es2df(data, keep=as.character(as.list(formula)[[2]]))
+        data = es2df(data, keep=as.character(as.list(formula)[[2]])) # [[2]] is the 'response' assumed to be a single column
+	thecall = match.call()
+        ans = MLearn( formula, data, .method, trainInd, ... )
+ 	ans@call = thecall
+        ans@learnerSchema = .method
+	ans
+ })
+
+setMethod("MLearn", c("formula", "SummarizedExperiment", "learnerSchema", "numeric" ),
+  function(formula, data, .method, trainInd, ...) {
+#
+# the keep setting below says just keep the response variable
+# from pData
+#
+        data = se2df(data, keep=as.character(as.list(formula)[[2]])) # [[2]] is the 'response' assumed to be a single column
 	thecall = match.call()
         ans = MLearn( formula, data, .method, trainInd, ... )
  	ans@call = thecall

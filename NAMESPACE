@@ -9,6 +9,8 @@ exportPattern("..*")
   importFrom("stats", "as.formula", "cutree", "dist", "hclust", "mad",
              "median", "model.frame", "model.matrix", "model.response",
              "na.fail", "prcomp", "predict", "quantile", "terms", "var")
+  importFrom("magrittr", "%>%")
+  import(SummarizedExperiment)
 
 #import("methods")
 #import("tools")
