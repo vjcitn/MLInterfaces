@@ -1,7 +1,7 @@
 Package: MLInterfaces
 Title: Uniform interfaces to R machine learning procedures for data in
         Bioconductor containers
-Version: 1.75.1
+Version: 1.75.1-1
 Author: Vince Carey <stvjc@channing.harvard.edu>, Robert Gentleman,
         Jess Mar, and contributions from Jason Vertrees
         <jv@cs.dartmouth.edu> and Laurent Gatto <lg390@cam.ac.uk>
@@ -29,3 +29,4 @@ git_last_commit_date: 2020-03-07
 Date/Publication: 2020-03-08
 NeedsCompilation: no
 Packaged: 2020-03-08 23:25:48 UTC; biocbuild
+RoxygenNote: 7.1.2

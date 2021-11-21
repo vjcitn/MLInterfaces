@@ -1,4 +1,55 @@
-exportPattern("..*")
+#exportPattern("..*")
+
+export(knnI) 
+export(knn.cvI)
+export(glmI.logistic)
+export(hclustI)
+export(kmeansI)
+export(pamI)
+export(nnetI)
+
+
+export(randomForestI)
+export(dldaI)
+export(rpartI)
+export(ldaI)
+export(svmI)
+export(qdaI)
+export(RABI)
+export(lvqI)
+export(naiveBayesI)
+export(ksvmI)
+export(adaI)
+export(blackboostI)
+export(nnetI)
+export(baggingI)
+export(sldaI)
+export(plsdaI)
+export(RAB)
+export(DAB)
+export(makeLearnerSchema)
+export(confuTab)
+export(gbm2)
+export(BgbmI)
+export(projectLearnerToGrid)
+
+export(balKfold.xvspec)
+export(ldaI.predParms)
+export(xvalSpec)
+export(fs.absT)
+export(fs.probT)
+export(fs.topVariance)
+
+exportMethods("show", "RObject", "confuMat", "trainInd",
+              "precision", "recall", "sensitivity", "macroF1",
+              "F1", "acc", "tp", "tn", "fp", "fn", "specificity",
+              "MLearn", "planarPlot", "Predict", "getVarImp",
+              "trainScores","trainPredictions",
+              "testScores", "testPredictions",
+              "predictions", "predScores", "predScore",
+              "fsHistory", "report", "getDist", "getConverter")
+
+
 
 # from CHECK of 3/25/2020
 
@@ -12,75 +63,5 @@ exportPattern("..*")
   importFrom("magrittr", "%>%")
   import(SummarizedExperiment)
 
-#import("methods")
-#import("tools")
-#import("BiocGenerics", except="var")
-#import("Biobase")
-#import("annotate")
-#import("MASS")
-#import("rpart")
-#import("sfsmisc")
-#import("pls")
-#import("shiny")
-#import("ggvis")
-#import("fpc")
-#import(threejs)
-#import(mlbench)
-#
-#importFrom(gbm, gbm, predict.gbm)
-#
-#importFrom("genefilter", "rowttests")
-#importFrom("base", "plot")
-#importFrom("cluster", "silhouette")
-#importFrom("gdata", "drop.levels")
-#
-#importFrom("RColorBrewer", "brewer.pal")
-#
-#importFrom("hwriter", "hwrite")
-#
-#exportClasses( 
-#	"varImpStruct",
-##	"raboostCont", "daboostCont",
-#	"classifierOutput", "learnerSchema", #"nonstandardLearnerSchema",
-#	"xvalSpec", "clusteringOutput")
-#	
-#exportMethods("show", "RObject", "confuMat", "trainInd",
-#              "precision", "recall", "sensitivity", "macroF1",
-#              "F1", "acc", "tp", "tn", "fp", "fn", "specificity",
-#              "MLearn", "planarPlot", "Predict", "getVarImp", 
-#              "trainScores","trainPredictions",
-#              "testScores", "testPredictions",
-#              "predictions", "predScores", "predScore", 
-#              "fsHistory", "report", "getDist", "getConverter")
-#
-#export(randomForestI, knnI, dldaI, nnetI, rpartI, 
-#       ldaI, svmI, ldaI.predParms, qdaI, glmI.logistic, 
-#       RABI, lvqI, naiveBayesI, baggingI, knn2, dlda2, 
-#       rab, lvq, RAB, DAB, plsda2, svm2, ksvm2, 
-#       xvalSpec, getVarImp, balKfold.xvspec, 
-#       makeLearnerSchema, standardMLIConverter, sldaI, 
-#       fs.absT, fs.probT, ksvmI, knn.cvI, knn.cv2, 
-#       adaI, fs.topVariance, hclustI, kmeansI, pamI,
-#       blackboostI,
-#       gbm2, BgbmI, plsdaI,
-#       confuTab) 
-#
-#S3method("predict", "classifierOutput")
-#
-#exportMethods("plot")
-#export(hclustWidget, mlearnWidget)
-#
-#exportClasses("projectedLearner")
-#export(projectLearnerToGrid)
-#exportMethods("learnerIn3D", "plotOne")
-#
-#export(plspinHcube)
-#
-## recommended
-#importFrom("grDevices", "colorRampPalette")
-#importFrom("graphics", "axis", "barplot", "legend", "pairs", "par",
-#             "points", "text")
-#importFrom("stats", "as.formula", "cutree", "dist", "hclust", "median",
-#             "model.frame", "model.matrix", "model.response", "na.fail",
-#             "prcomp", "predict", "quantile", "terms", "var")
-#
+
+

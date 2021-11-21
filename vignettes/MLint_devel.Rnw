@@ -132,7 +132,7 @@ interface and a predict method.  We can create a learnerSchema on the fly,
 and then use it:
 
 <<mkadaI>>=
-adaI = makeLearnerSchema("ada", "ada", standardMLIConverter )
+adaI = makeLearnerSchema("ada", "ada", MLInterfaces:::standardMLIConverter )
 arun = MLearn(sp~CL+RW, data=crabs, adaI, kp )
 confuMat(arun)
 RObject(arun)
@@ -140,7 +140,7 @@ RObject(arun)
 
 What is the standardMLIConverter?
 <<lks>>=
-standardMLIConverter
+MLInterfaces:::standardMLIConverter
 @
 
 \subsection{Dealing with gbm}
