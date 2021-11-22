@@ -1,0 +1,162 @@
+---
+title: "MLint_devel: On the extension of MLInterfaces"
+author: "Vincent J. Carey, stvjc at channing.harvard.edu"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{MLint_devel: On the extension of MLInterfaces}
+  %\VignetteEncoding{UTF-8}
+output:
+  BiocStyle::html_document:
+    highlight: pygments
+    number_sections: yes
+    theme: united
+    toc: yes
+---
+
+# Introduction
+
+MLearn, the workhorse method of MLInterfaces, has been streamlined
+to support simpler development.
+
+In 1.*, MLearn included a substantial switch statement, and the
+external learning function was identified by a string.  Many
+massage tasks were wrapped up in switch case elements devoted to
+each method.  MLearn returned instances of MLOutput, but these
+had complicated subclasses.
+
+MLearn now takes a signature \texttt{c("formula", "data.frame", "learnerSchema",
+"numeric")}, with the expectation that extra parameters captured in ... go to the fitting
+function.  The complexity of dealing with expectations and return
+values of different machine learning functions is handled primarily by
+the learnerSchema instances.  The basic realizations are that
+
+-  most learning functions use the formula/data idiom, and additional
+parameters can go in ...
+-  the problem of converting from the function's output structures (typically
+lists, but sometimes also objects with attributes) to the uniform
+structure delived by MLearn should be handled as generically
+as possible, but specialization will typically be needed
+-  the conversion process can be handled in most cases using only the
+native R object returned by the learning function, the data, and the training index set.
+-  some functions, like knn, are so idiosyncratic (lacking formula interface or
+predict method) that special software is needed to adapt MLearn to work with them
+
+
+Thus we have defined a learnerSchema class,
+```{r lks}
+library(MLInterfaces)
+library(gbm)
+getClass("learnerSchema")
+```
+along with a constructor used to define a family of schema objects that help
+MLearn carry out specific tasks of learning.
+
+# Some examples
+
+We define interface schema instances with suffix "I".
+
+randomForest has a simple converter:
+```{r lkrf}
+randomForestI@converter
+```
+
+The job of the converter is to populate as much as the classifierOutput
+instance as possible.  For something like nnet, we can do more:
+```{r lknn}
+nnetI@converter
+```
+We can get posterior class probabilities.
+
+To obtain the predictions necessary for confusionMatrix computation, we
+may need the converter to know about parameters used in the fit.
+Here, closures are used.
+
+```{r lkknn}
+knnI(k=3, l=2)@converter
+```
+
+So we can have the following calls:
+```{r show}
+library(MASS)
+data(crabs)
+kp = sample(1:200, size=120)
+rf1 = MLearn(sp~CL+RW, data=crabs, randomForestI, kp, ntree=100)
+rf1
+RObject(rf1)
+knn1 = MLearn(sp~CL+RW, data=crabs, knnI(k=3,l=2), kp)
+knn1
+```
+
+# Making new interfaces
+
+## A simple example: ada
+
+The `ada` method of the `r BiocStyle::CRANpkg("ada")` package has a formula
+interface and a predict method.  We can create a `learnerSchema` on the fly,
+and then use it:
+
+```{r mkadaI}
+adaI = makeLearnerSchema("ada", "ada", MLInterfaces:::standardMLIConverter )
+arun = MLearn(sp~CL+RW, data=crabs, adaI, kp )
+confuMat(arun)
+RObject(arun)
+```
+
+What is the standardMLIConverter?
+```{r lks2}
+MLInterfaces:::standardMLIConverter
+```
+
+## Dealing with gbm
+
+The `r BiocStyle::CRANpkg("gbm")` package workhorse fitter is `gbm`.  The formula
+input must have a numeric response, and the predict method only returns
+a numeric vector.  We introduced a `gbm2` function
+```{r lkggg}
+gbm2
+```
+that requires a two-level factor response and recodes for use by gbm.
+It also returns an S3 object of newly defined class gbm2, which only
+returns a factor.  At this stage, we could use a standard interface, but
+the prediction values will be unpleasant to work with.  Furthermore the
+predict method requires specification of \texttt{n.trees}.
+So we pass a parameter \texttt{n.trees.pred}.
+```{r tryg}
+BgbmI
+set.seed(1234)
+gbrun = MLearn(sp~CL+RW+FL+CW+BD, data=crabs, BgbmI(n.trees.pred=25000,thresh=.5), 
+   kp, n.trees=25000, 
+   distribution="bernoulli", verbose=FALSE )
+gbrun
+confuMat(gbrun)
+summary(testScores(gbrun))
+```
+
+
+# Additional features
+
+The xvalSpec class allows us to specify types of cross-validation, and to
+control carefully how partitions are formed.  More details are provided
+in the `MLprac2_2` vignette.
+
+# The MLearn approach to clustering and other forms of unsupervised learning
+
+The `hclustI` interface simplifies application of hierarchical
+clustering algorithms.  For a simple data frame we have:
+
+```{r showcl}
+cl1a = MLearn(~CW+RW+CL+FL+BD, data=crabs, hclustI(distFun=dist, cutParm=list(k=4)), 
+         method="complete")
+plot(cl1a)
+```
+
+A simple illustration for an ExpressionSet instance:
+```{r showes}
+library(golubEsets)
+data(Golub_Train)
+litg = Golub_Train[ 100:150, ]
+esdemo = MLearn(~., litg, hclustI(distFun=dist, cutParm=list(k=4)), method="complete")
+plot(esdemo)
+```
+
