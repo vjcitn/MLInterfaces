@@ -160,3 +160,35 @@ setMethod("MLearn", c("formula", "data.frame",
 #
 #cl1 = MLearn(~CW+RW+CL+FL+BD, data=crabs, hclustI(distFun=dist, cutParm=list(k=4)))
 #cl2 = MLearn(~CW+RW+CL+FL+BD, data=crabs, kmeansI, centers=5, algorithm="Hartigan-Wong")
+
+setMethod("MLearn", c("formula", "ExpressionSet",
+   "clusteringSchema", "ANY"),
+   function(formula, data, .method, trainInd, ...) {
+   lfun = do.call("::", list(pkg=.method@package, name=.method@mlFunName))
+#
+# formula work
+#
+  data = as.data.frame(t(exprs(data)))
+  dframe = try(model.frame(formula, data, na.action=na.fail))
+  if (inherits(dframe, "try-error"))
+     stop("problem in model.frame -- could be NA in data.  must stop.")
+  rawdata = data = data.matrix(dframe)
+  resp = model.response(dframe)
+  if (!is.null(resp)) {
+    kpcol = attr(attr(dframe, "terms"), "term.labels")
+    data = data[, kpcol]
+    rawdata = rawdata[, kpcol]
+    }
+#
+# end formula work
+#
+   dstruc = .method@distFun(data)  # distFun could be identity
+   ans = lfun( dstruc, ... )
+   CLOb = .method@converter(ans, dstruc) # clusteringOutput
+   if (!inherits(data, "dist")) dstruc = dist(data) # force euclidean for now
+   CLOb@silhouette = cluster::silhouette(CLOb@partition, dstruc)
+   CLOb@prcomp = new("prcompObj", prcomp(data))
+   CLOb@learnerSchema = .method
+   CLOb@call = match.call()
+   CLOb
+})
