@@ -32,6 +32,7 @@
 \alias{adaI}
 \alias{MLearn,formula,ExpressionSet,character,numeric-method}
 \alias{MLearn,formula,ExpressionSet,learnerSchema,numeric-method}
+\alias{MLearn,formula,SummarizedExperiment,learnerSchema,numeric-method}
 \alias{MLearn,formula,data.frame,learnerSchema,numeric-method}
 \alias{MLearn,formula,data.frame,learnerSchema,xvalSpec-method}
 \alias{MLearn,formula,ExpressionSet,learnerSchema,xvalSpec-method}
