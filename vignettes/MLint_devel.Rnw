@@ -168,7 +168,6 @@ confuMat(gbrun)
 summary(testScores(gbrun))
 @
 
-
 \section{Additional features}
 
 The xvalSpec class allows us to specify types of cross-validation, and to

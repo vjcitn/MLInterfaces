@@ -662,7 +662,6 @@ confuMat(rfALL)
 None of these are extremely impressive, but the problem may just
 be very hard.  
 
-
 \subsubsection{Gene set appraisal}
 
 \addtocounter{mlq}{1}
