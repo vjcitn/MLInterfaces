@@ -44,6 +44,7 @@
 \alias{MLIPredicter.svm}
 \alias{cverrs}
 \alias{es2df}
+\alias{se2df}
 \alias{hclustConverter}
 \alias{kmeansConverter}
 \alias{makeClusteringSchema}
