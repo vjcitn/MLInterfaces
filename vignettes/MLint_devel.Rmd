@@ -27,7 +27,7 @@ tasks were wrapped up in switch case elements devoted to each method.
 MLearn returned instances of MLOutput, but these had complicated
 subclasses.
 
-  MLearn now takes a signature `c("formula", "data.frame", "learnerSchema", "numeric")`, with the
+  MLearn now takes a signature <tt>c("formula", "data.frame", "learnerSchema", "numeric")</tt>, with the
 expectation that extra parameters captured in \... go to the fitting
 function. The complexity of dealing with expectations and return values
 of different machine learning functions is handled primarily by the
@@ -51,7 +51,7 @@ learnerSchema instances. The basic realizations are that
 
 Thus we have defined a learnerSchema class, 
 
-```{r}
+```{r message=FALSE}
 library(MLInterfaces) 
 library(gbm)
 getClass("learnerSchema") 
