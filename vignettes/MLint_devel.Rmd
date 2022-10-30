@@ -27,7 +27,7 @@ tasks were wrapped up in switch case elements devoted to each method.
 MLearn returned instances of MLOutput, but these had complicated
 subclasses.
 
-  MLearn now takes a signature <tt>c("formula", "data.frame", "learnerSchema", "numeric")</tt>, with the
+MLearn now takes a signature <tt>c("formula", "data.frame", "learnerSchema", "numeric")</tt>, with the
 expectation that extra parameters captured in \... go to the fitting
 function. The complexity of dealing with expectations and return values
 of different machine learning functions is handled primarily by the
@@ -51,7 +51,7 @@ learnerSchema instances. The basic realizations are that
 
 Thus we have defined a learnerSchema class, 
 
-```{r message=FALSE}
+```{r setup, message=FALSE}
 library(MLInterfaces) 
 library(gbm)
 getClass("learnerSchema") 
@@ -67,14 +67,14 @@ We define interface schema instances with suffix \"I\".
 
 randomForest has a simple converter: 
 
-```{r}
+```{r lkrf}
 randomForestI@converter
 ```
 
 The job of the converter is to populate as much as the classifierOutput
 instance as possible. For something like nnet, we can do more:
 
-```{r}
+```{r lknn}
 nnetI@converter 
 ```
 We can get posterior class
@@ -84,13 +84,13 @@ To obtain the predictions necessary for confusionMatrix computation, we
 may need the converter to know about parameters used in the fit. Here,
 closures are used.
 
-```{r}
+```{r lkknn}
 knnI(k=3, l=2)@converter
 ```
 
 So we can have the following calls: 
 
-```{r}
+```{r show, message=FALSE}
 library(MASS)
 data(crabs)
 kp = sample(1:200, size=120)
@@ -107,11 +107,11 @@ Making new interfaces
 A simple example: ada
 ---------------------
 
-The `ada` method of the *ada* package has a formula interface and a
+The <tt>ada</tt> method of the *ada* package has a formula interface and a
 predict method. We can create a learnerSchema on the fly, and then use
 it:
 
-```{r}
+```{r mkadaI, message=FALSE}
 adaI = makeLearnerSchema("ada", "ada", standardMLIConverter )
 arun = MLearn(sp~CL+RW, data=crabs, adaI, kp )
 confuMat(arun)
@@ -119,7 +119,7 @@ RObject(arun)
 ```
 What is the standardMLIConverter? 
 
-```{r}
+```{r lks}
 standardMLIConverter
 ```
 Dealing with gbm
@@ -129,7 +129,7 @@ The *gbm* package workhorse fitter is `gbm`. The formula input must have
 a numeric response, and the predict method only returns a numeric
 vector. There is also no namespace. We introduced a gbm2 function
 
-```{r}
+```{r lkggg}
 gbm2
 ```
 that requires a two-level factor response and
@@ -137,9 +137,9 @@ recodes for use by gbm. It also returns an S3 object of newly defined
 class gbm2, which only returns a factor. At this stage, we could use a
 standard interface, but the prediction values will be unpleasant to work
 with. Furthermore the predict method requires specification of
-`n.trees`. So we pass a parameter `n.trees.pred`.
+<tt>n.trees</tt>. So we pass a parameter <tt>n.trees.pred</tt>.
 
-```{r}
+```{r tryg}
 BgbmI
 set.seed(1234)
 gbrun = MLearn(sp~CL+RW+FL+CW+BD, data=crabs, BgbmI(n.trees.pred=25000,thresh=.5), kp, n.trees=25000, distribution="bernoulli", verbose=FALSE )
