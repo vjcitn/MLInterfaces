@@ -1,0 +1,631 @@
+---
+title: 'A machine learning tutorial tutorial: applications of the Bioconductor MLInterfaces package to gene expression data'
+author:
+- name: "VJ Carey"
+- name: "P. Atieno"
+  affiliation: "Vignette translation from Sweave to Rmarkdown / HTML"
+  package: MLInterfaces
+  
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+output:
+  BiocStyle::html_document
+---
+
+Overview
+========
+
+The term *machine learning* refers to a family of computational methods
+for analyzing multivariate datasets. Each data point has a vector of
+*features* in a shared *feature space*, and may have a *class label*
+from some fixed finite set.
+
+*Supervised learning* refers to processes that help articulate rules
+that map *feature vectors* to *class labels*. The class labels are known
+and function as supervisory information to guide rule construction.
+*Unsupervised learning* refers to processes that discover structure in
+collections of feature vectors. Typically the structure consists of a
+grouping of objects into clusters.
+
+This practical introduction to machine learning will begin with a survey
+of a low-dimensional dataset to fix concepts, and will then address
+problems coming from genomic data analysis, using RNA expression and
+chromatin state data.
+
+Some basic points to consider at the start:
+
+-   Distinguish predictive modeling from inference on model parameters.
+    Typical work in epidemiology focuses on estimation of relative
+    risks, and random samples are not required. Typical work with
+    machine learning tools targets estimation (and minimization) of the
+    misclassification rate. Representative samples are required for this
+    task.
+
+-   "Two cultures": model fitters vs. algorithmic predictors. If
+    statistical models are correct, parameter estimation based on the
+    mass of data can yield optimal discriminators (e.g., LDA).
+    Algorithmic discriminators tend to prefer to identify boundary cases
+    and downweight the mass of data (e.g., boosting, svm).
+
+-   Different learning tools have different capabilities. There is
+    little *a priori* guidance on matching learning algorithms to
+    aspects of problems. While it is convenient to sift through a
+    variety of approaches, one must pay a price for the model search.
+
+-   Data and model/learner visualization are important, but
+    visualization of higher dimensional data structures is hard. Dynamic
+    graphics can help; look at ggobi and Rggobi for this.
+
+-   These notes provide very little mathematical background on the
+    methods; see for example Ripley (*Pattern recognition and neural
+    networks*, 1995), Duda, Hart, Stork (*Pattern classification*),
+    Hastie, Tibshirani and Friedman (2003, *Elements of statistical
+    learning*) for copious background.
+
+Getting acquainted with machine learning via the crabs data
+===========================================================
+
+## Attaching and checking the data
+
+The following steps bring the crabs data into scope and illustrate
+aspects of its structure.
+
+```{r intro1} 
+library("MASS") 
+data("crabs") 
+dim(crabs)
+crabs[1:4,] 
+table(crabs$sex)
+```
+
+```{r figbwplot, echo=FALSE, fig.cap="\\label{fig:figbwplot} Boxplots of RW, the rear width in mm, stratified by species('B' or 'O' for blue or orange) and sex ('F' and 'M')."}
+library("lattice")
+print(bwplot(RW~sp|sex, data=crabs))
+```
+
+The plot is shown in Figure 1.
+
+We will regard these data as providing five quantitative features
+(FL, RW,   CL,   CW,  BD)^[You may consult the manual page of <tt>{crabs}</tt> 
+for an explanation of these abbreviations.] and a pair of class labels (sex, sp=species).
+We may regard this as a four class problem, or as two two class
+problems.
+
+
+## A simple classifier derived by human reasoning
+
+Our first problem does not involve any computations.
+If you want to write R code to solve the problem, do so,
+but use prose first.
+
+-  *Question 1*.  On the basis of the boxplots in Figure 1, comment on the prospects
+for predicting species on the basis of RW.  State a
+rule for computing the predictions.  Describe how to assess the
+performance of your rule.
+
+
+## Prediction via logistic regression
+
+A simple approach to prediction involves logistic regression.
+```{r dop}
+m1 = glm(sp~RW, data=crabs, family=binomial)
+summary(m1)
+```
+
+-   *Question 2*.  Write down the statistical model
+corresponding to the R expression above.  How can we derive
+a classifier from this model?
+
+-   *Question 3*.  Perform the following
+computations.  Discuss their interpretation.
+What are the estimated error rates of the two
+models?  Is the second model, on the subset, better?
+
+
+```{r domo, results='hide', fig.show="hide"}
+plot(predict(m1,type="response"), crabs$sp,)
+table(predict(m1,type="response")>.5, crabs$sp)
+m2 = update(m1, subset=(sex=="F"))
+table(predict(m2,type="response")>.5, crabs$sp[crabs$sex=="F"])
+```
+
+## The cross-validation concept
+
+Cross-validation is a technique that is widely used for
+reducing bias in the estimation of predictive accuracy. If no precautions are taken,
+bias can be caused by *overfitting* a classification algorithm to a particular
+dataset; the algorithm learns the classification ''by heart'', but performs poorly 
+when asked to generalise it to new, unseen examples.
+Briefly, in cross-validation the dataset is deterministically partitioned into
+a series of training and test sets.  The model is built
+for each training set and evaluated on the test set.
+The accuracy measures are averaged over this series
+of fits.  Leave-one-out cross-validation consists of N
+fits, with N training sets of size N-1 and N test sets
+of size 1.
+
+First let us use <tt>MLearn</tt> from the 
+*MLInterfaces* package to fit a single logistic model.
+<tt>MLearn</tt> requires you to specify an index set for training.
+We use <tt>c(1:30, 51:80)</tt> to choose a training set of
+size 60, balanced between two species (because we know the
+ordering of records).  This procedure also requires you
+to specify a probability threshold for classification.
+We use a typical default of 0.5.  If the predicted probability
+of being "O" exceeds 0.5, we classify to "O", otherwise to "B".
+
+```{r doml1, message=FALSE}
+library(MLInterfaces)
+fcrabs = crabs[crabs$sex == "F", ] 
+ml1 = MLearn( sp~RW, fcrabs,glmI.logistic(thresh=.5), c(1:30, 51:80), family=binomial) 
+ml1
+confuMat(ml1)
+```
+
+-   *Question 4.*  What does the report on <tt>ml1</tt> tell you about
+    predictions with this model? Can you reconcile this with the results
+    in model <tt>m2</tt>? [Hint -- non-randomness of the selection of the
+    training set is a problem.]
+    
+-   *Question 5.*  Modify the MLearn call to obtain a predictor that is
+    more successful on the test set.
+
+Now we will illustrate cross-validation. First, we scramble the order of
+records in the <tt>ExpressionSet</tt> so that sequentially formed groups are
+approximately random samples.
+
+```{r doscra}
+set.seed(123) 
+sfcrabs = fcrabs[ sample(nrow(fcrabs)), ]
+```
+
+We invoke the <tt>MLearn</tt> method in two ways -- first specifying a training
+index set, then specifying a five-fold cross-validation. 
+
+```{r domods}
+sml1 = MLearn( sp~RW, sfcrabs, glmI.logistic(thresh=.5),c(1:30, 51:80),family=binomial)
+confuMat(sml1)
+smx1 = MLearn( sp~RW, sfcrabs, glmI.logistic(thresh=.5),xvalSpec("LOG", 5, function(data, clab, iternum) {which(rep(1:5, each=20) == iternum) }), family=binomial)
+confuMat(smx1)
+```
+
+-   *Question 6.* Define clearly the difference between models sml1 and
+    smx1 and state the misclassification rate estimates associated with
+    each model.
+
+## Exploratory multivariate analysis
+
+### Scatterplots
+
+-   *Question 7.* Interpret the following code, whose result is shown in
+    Figure 2. Modify it to depict the pairwise
+    configurations with different colors for crab genders.
+
+```{r figdopa,fig=TRUE,width=7,height=7, fig.cap="\\label{fig:figdopa}Pairs plot of the 5 quantitative features of the crabs data.Points are colored by species."}
+pairs(crabs[,-c(1:3)], col=ifelse(crabs$sp=="B", "blue", "orange"))
+```
+
+
+### Principal components; biplot
+
+Principal components analysis transforms the multivariate
+data *X* into a new coordinate system.  If the original variables
+are X1, . . . , X~p~, then the variables in the new representation
+are denoted PC1, . . . , PC~p~.  These new variables have
+the properties that PC1 is the linear combination of the X1, . . . , X~p~
+having maximal variance, PC2 is the variance-maximizing linear combination of
+residuals of X after projecting into the hyperplane normal to PC1, and so on.
+If most of the variation in X~n×p~ can be captured in a low dimensional linear subspace of the space
+spanned by the columns of X, then the scatterplots of the first few
+principal components give a good representation of the structure in the
+data.
+
+Formally, we can compute the PC using the singular value decomposition
+of *X*, in which *X = U DV^2^*,  where *U~n×p~* and *V~p×p~*  are orthonormal, and *D* is a diagonal matrix of $p$
+nonnegative singular values. The principal components transformation is
+*XV = UD*, and if *D* is structured so that *D~ii~ ≥ D~jj~*
+whenever *i > j*, then column *i* of *XV* is PCi. Note also that
+*D~ii~* = √*n − 1* sd(PCi).
+
+```{r dopc, fig.cap="\\label{fig:figdopa}Pairs plot of the crabs data in principal component coordinates"}
+pc1 = prcomp( crabs[,-c(1:3)] )
+pairs(pc1$x, col=ifelse(crabs$sp=="B", "blue", "orange"))
+```
+
+
+The plot is shown in Figure 3.
+
+The biplot, Figure 4, shows the data in PC space and also shows the
+relative contributions of the original variables in composing the
+transformation.
+
+```{r figdobi,fig=TRUE, fig.cap="\\label{fig:figdopa} Biplot of the principal component analysis of the crabs data."}
+biplot(pc1, choices=2:3, col=c("#80808080", "red"))
+```
+
+
+### Clustering
+
+A familiar technique for displaying multivariate data in high-throughput
+biology is called the heatmap. In this display, samples are clustered as
+columns, and features as rows. The clustering technique used by default
+is R <tt>hclust</tt>. This procedure builds a clustering tree for the data as
+follows. Distances are computed between each pair of feature vectors for
+all *N* observations. The two closest pair is joined and regarded as a
+new object, so there are *N-1* objects (clusters) at this point. This
+process is repeated until 1 cluster is formed; the clustering tree shows
+the process by which clusters are created via this agglomeration
+process.
+
+The most crucial choice when applying this method is the initial choice
+of the distance metric between the features.
+
+Once clusters are being formed, there are several ways to measure
+distances between them, based on the initial between-feature distances.
+Single-linkage clustering takes the distance between two clusters to be
+the shortest distance between any two members of the different clusters;
+average linkage averages all the distances between members;
+complete-linkage uses hte maximum distance between any two members of
+the different clusters. Other methods are also available in <tt>hclust</tt>.
+
+Figure 5 shows cluster trees for samples and features. The default color choice is not
+great, thus we specify own using the <tt>col</tt> argument. A tiled display at
+the top, defined via the argument <tt>ColSideColors</tt> shows the species
+codes for the samples. An important choice to be made when calling
+<tt>heatmap</tt> is the value of the argument <tt>scale</tt>, whose default setting is
+to scale the rows, but not the columns. 
+
+```{r checkClaim,echo=FALSE}
+stopifnot(eval(formals(heatmap)$scale)[1]=="row")
+``` 
+
+```{r figdohm,fig=TRUE,height=6.5,width=6.5, fig.cap="\\label{fig:figdopa}Heatmap plot of the crabs data, including dendrograms representing hierarchical clustering of the rows and columns."}
+X = data.matrix(crabs[,-c(1:3)])
+heatmap(t(X), ColSideColors=ifelse(crabs$sp=="O", "orange", "blue"), col =
+colorRampPalette(c("blue", "white", "red"))(255)) 
+```
+
+Typically clustering is done in the absence of labels -- it is an
+example of unsupervised machine learning. We can ask whether the
+clustering provided is a 'good' one using the measurement of a quantity
+called the *silhouette*. This is defined in R documentation as follows:
+
+         For each observation i, the _silhouette width_ s(i) is defined as
+         follows: 
+          Put a(i) = average dissimilarity between i and all other points
+         of the cluster to which i belongs (if i is the _only_ observation
+         in its cluster, s(i) := 0 without further calculations). For all
+         _other_ clusters C, put d(i,C) = average dissimilarity of i to all
+         observations of C.  The smallest of these d(i,C) is b(i) := min_C
+         d(i,C), and can be seen as the dissimilarity between i and its
+         "neighbor" cluster, i.e., the nearest one to which it does _not_
+         belong. Finally, 
+
+                 s(i) := ( b(i) - a(i) ) / max( a(i), b(i) ).
+
+We can compute the silhouette for any partition of a dataset, and can
+use the hierarchical clustering result to define a partition as follows:
+
+```{r docl}
+cl = hclust(dist(X)) 
+tr = cutree(cl,2)
+table(tr)
+```
+
+```{r dos,fig=TRUE}
+library(cluster) 
+sil = silhouette( tr, dist(X) )
+plot(sil) 
+```
+
+-   *Question 8.* In the preceding, we have used default `dist`, and
+    default clustering algorithm for the heatmap. Investigate the impact
+    of altering the choice of distance and clustering method on the
+    clustering performance, both in relation to capacity to recover
+    groups defined by species and in relation to the silhouette
+    distribution.
+
+-   *Question 9.* The PCA shows that the data configuration in PC2 and
+    PC3 is at least bifurcated. Apply hierarchical and K-means
+    clustering to the two-dimensional data in this subspace, and compare
+    results with respect to capturing the species $\times$ gender
+    labels, and with respect to silhouette values. For example, load the
+    exprs slot of crES [see just below for the definition of this
+    structure] with the PCA reexpression of the features, call the
+    result pcrES, and then:
+
+        > ff = kmeansB(pcrES[2:3,], k=4)
+        > table(ff@clustIndices, crES$spsex)
+
+## Supervised learning
+
+
+In this section we will examine procedures for polychotomous prediction.
+We want to be able to use the measurements to predict both species and
+sex of the crab. Again we would like to use the MLInterfaces
+infrastructure, so an ExpressionSet container will be useful.
+
+```{r newes}
+feat2 = t(data.matrix(crabs[, -c(1:3)])) 
+pd2 =new("AnnotatedDataFrame", crabs[,1:2]) 
+crES = new("ExpressionSet",exprs=feat2, phenoData=pd2)
+crES$spsex = paste(crES$sp,crES$sex, sep=":")
+table(crES$spsex)
+```
+
+We will permute the samples so that simple
+selections for training set indices are random samples. 
+
+```{r doper}
+set.seed(1234) 
+crES = crES[ , sample(1:200, size=200, replace=FALSE)]
+```
+
+### RPART
+
+A classic procedure is recursive partitioning. 
+
+```{r dotr, message=FALSE}
+library(rpart)
+tr1 = MLearn(spsex~., crES, rpartI, 1:140)
+tr1
+confuMat(tr1) 
+```
+
+The actual tree is 
+```{r doplTree,fig=TRUE}
+plot(RObject(tr1))
+text(RObject(tr1)) 
+```
+This procedure includes a diagnostic tool called
+the cost-complexity plot: 
+
+```{r doccp,fig=TRUE}
+plotcp(RObject(tr1)) 
+```
+
+### Random forests
+
+A generalization of recursive partitioning is obtained by creating a
+collection of trees by bootstrap-sampling cases and randomly sampling
+from features available for splitting at nodes.
+
+```{r dorf, message=FALSE}
+set.seed(124) 
+library(randomForest)
+crES$spsex = factor(crES$spsex) # needed 3/2020 as fails with 'do regression?' error 
+rf1 = MLearn(spsex~., crES, randomForestI, 1:140 )
+rf1
+cm = confuMat(rf1)
+cm 
+```
+
+The single split error rate is estimated at 28%.
+
+-   *Question 10.* What is the out-of-bag error rate for rf1? Obtain a
+    cross-validated estimate of misclassification error using
+    randomForest with an xvalSpec().
+
+### Linear discriminants
+
+```{r dold, message=FALSE}
+ld1 = MLearn(spsex~., crES, ldaI, 1:140 ) 
+ld1
+confuMat(ld1)
+xvld = MLearn( spsex~., crES, ldaI, xvalSpec("LOG", 5,balKfold.xvspec(5)))
+confuMat(xvld)
+```
+
+-   *Question 11.* Use the balKfold function to generate an index set for
+    partitions that is balanced with respect to class distribution.
+    Check the balance and repeat the cross validation.
+
+### Neural net
+
+```{r, message=FALSE}
+nn1 = MLearn(spsex~., crES, nnetI, 1:140, size=3, decay=.1)
+nn1 
+RObject(nn1) 
+confuMat(nn1)
+```
+
+```{r doxx, message=FALSE}
+xvnnBAD = MLearn( spsex~., crES, nnetI, xvalSpec("LOG", 5, function(data, clab,iternum) which( rep(1:5,each=40) == iternum ) ), size=3,decay=.1 )
+xvnnGOOD = MLearn( spsex~., crES, nnetI, xvalSpec("LOG", 5,balKfold.xvspec(5) ), size=3, decay=.1 )
+```
+
+
+```{r lktann}
+confuMat(xvnnBAD)
+confuMat(xvnnGOOD)
+```
+
+### SVM
+
+```{r dnn, message=FALSE} 
+sv1 = MLearn(spsex~., crES, svmI, 1:140) 
+sv1 
+RObject(sv1)
+confuMat(sv1) 
+```
+
+```{r doxxs, message=FALSE}
+xvsv = MLearn( spsex~., crES,svmI, xvalSpec("LOG", 5, balKfold.xvspec(5)))
+```
+
+```{r lktasv}
+confuMat(xvsv) 
+```
+
+# Learning with expression arrays
+
+Here we will concentrate on ALL: acute lymphocytic leukemia, B-cell
+type.
+
+## Phenotype reduction
+
+We will identify expression patterns that discriminate individuals with
+BCR/ABL fusion in B-cell leukemia.
+
+```{r setupALL,cache=TRUE}
+library("ALL")
+data("ALL") 
+bALL = ALL[, substr(ALL$BT,1,1) == "B"]
+fus = bALL[, bALL$mol.biol %in% c("BCR/ABL", "NEG")]
+fus$mol.biol = factor(fus$mol.biol)
+fus 
+```           
+
+## Nonspecific filtering
+
+We can nonspecifically filter to 300 genes (to save computing time) with
+largest measures of robust variation across all samples:
+
+```{r getq}
+mads = apply(exprs(fus),1,mad) 
+fusk = fus[ mads > sort(mads,decr=TRUE)[300], ] 
+fcol =ifelse(fusk$mol.biol=="NEG", "green", "red")
+```
+
+## Exploratory work
+
+For exploratory data analysis, a heatmap is customary.
+
+```{r dohALL,fig=TRUE}
+heatmap(exprs(fusk), ColSideColors=fcol)
+``` 
+ 
+\includegraphics{fuskmap}
+
+Principal components and a biplot may be more revealing.
+How many principal components are likely to be important?
+
+```{r dopcALL}
+PCg = prcomp(t(exprs(fusk)))
+```
+
+```{r lkscre,fig=TRUE}
+plot(PCg)
+```
+
+```{r lkprALL,fig=TRUE}
+pairs(PCg$x[,1:5],col=fcol,pch=19)
+```
+
+```{r dobiALL,fig=TRUE}
+biplot(PCg) 
+```
+
+-   *Question 12.* Modify the biplot so that instead of plotting sample
+    ID, the symbol \"O\" is plotted for a NEG sample and \"+\" is
+    plotted for a BCR/ABL sample.
+
+```{=html}
+<!-- -->
+```
+-   *Question 13.* Consider the following code
+
+        chkT = function (x, eset=fusk) {
+        t.test(exprs(eset)[x, eset$mol.b == "NEG"], exprs(eset)[x, eset$mol.b == 
+            "BCR/ABL"]) }
+
+    Use it in conjunction with the biplot to interpret expression
+    patterns of genes that appear to be important in defining the PCs.
+
+## Classifier construction
+
+### Demonstrations
+
+Diagonal LDA has a good reputation. Let's try it first, followed by
+neural net and random forests. We will not attend to tuning the latter
+two, defaults or guesses for key parameters are used.
+
+```{r dld1,cache=TRUE, message=FALSE}
+dld1 = MLearn( mol.biol~., fusk, dldaI, 1:40 )
+```
+
+```{r dld2}
+dld1 
+confuMat(dld1) 
+```
+
+```{r dld3,cache=TRUE}
+nnALL = MLearn( mol.biol~., fusk, nnetI, 1:40, size=5, decay=.01, MaxNWts=2000 )
+```
+
+```{r dld4}
+confuMat(nnALL)
+```
+
+```{r dld5,cache=TRUE}
+rfALL = MLearn(
+mol.biol~., fusk, randomForestI, 1:40 ) 
+```
+
+```{r dld6}
+rfALL
+confuMat(rfALL)
+```
+
+None of these are extremely impressive, but the problem may just be very
+hard.
+
+### Gene set appraisal
+
+-   *Question 14.* We can assess the predictive capacity of a set of genes
+    by restricting the ExpressionSet to that set and using the best
+    classifier appropriate to the problem. We can also assess the
+    incremental effect of combining gene sets, relative to using them
+    separately.
+
+    One collection of gene sets that is straightforward to use and
+    interpret is provided by the keggorthology package (see also
+    GSEABase). Here's how we can define the ExpressionSets for genes
+    annotated by KEGG to Environmental (Genetic) Information Processing:
+    
+    ```{r getko, message=FALSE}
+    library(keggorthology) 
+    data(KOgraph) 
+    adj(KOgraph,nodes(KOgraph)[1])
+    EIP = getKOprobes("Environmental Information Processing")
+    GIP = getKOprobes("Genetic Information Processing")
+    length(intersect(EIP, GIP)) 
+    EIPi = setdiff(EIP, GIP) 
+    GIP = setdiff(GIP, EIP) 
+    EIP = EIPi
+    Efusk = fusk[ featureNames(fusk)  %in% EIP, ]
+    Gfusk = fusk[ featureNames(fusk)  %in% EIP, ]
+    ```
+    Obtain and assess the predictive
+    capacity of the genes annotated to \"Cell Growth and Death\".
+
+```{=html}
+<!-- -->
+```
+-   *Question 15.* How many of the genes identified by RDA as important
+    for discriminating fusion are annotated to Genetic Information
+    Processing in the KEGG orthology?
+
+# Embedding features selection in cross-validation
+
+We provide helper functions to conduct several kinds of feature
+selection in cross-validation, see <tt>help(fs.absT)</tt>. Here we pick the top
+30 features (ranked by absolute t statistic) for each cross-validation
+partition.
+
+```{r dofs, message=FALSE}
+dldFS = MLearn( mol.biol~., fusk, dldaI, xvalSpec("LOG", 5, balKfold.xvspec(5), fs.absT(30) ))
+dldFS 
+confuMat(dld1)
+confuMat(dldFS) 
+```
+
+Session information
+===================
+
+```{r lksess}
+sessionInfo() 
+```
+
