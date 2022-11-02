@@ -7,7 +7,7 @@ author:
   package: MLInterfaces
   
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{MLInterfaces 2.0 -- a new design}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 output:

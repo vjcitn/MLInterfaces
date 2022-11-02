@@ -7,7 +7,7 @@ author:
   package: MLInterfaces
   
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{A machine learning tutorial tutorial: applications of the Bioconductor MLInterfaces package to gene expression data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 output:

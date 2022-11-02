@@ -1,17 +1,17 @@
 Package: MLInterfaces
 Title: Uniform interfaces to R machine learning procedures for data in
         Bioconductor containers
-Version: 1.77.2
-Author: Vince Carey <stvjc@channing.harvard.edu>, Robert Gentleman,
-        Jess Mar, and contributions from Jason Vertrees
-        <jv@cs.dartmouth.edu> and Laurent Gatto <lg390@cam.ac.uk>
+Version: 1.77.3
 Authors@R: c(
+        person("Vincent", "Carey", role=c("cre", "aut"), comment = c(ORCID = "0000-0003-4046-0063"), email="stvjc@channing.harvard.edu"),
+        person("Jess", "Mar", role=c("aut")),
+	person("Jason", "Vertrees", role=c("ctb")),
+	person("Laurent", "Gatto", role=c("ctb")),
         person("Phylis", "Atieno",role = "ctb",
-        comment = "Translated 'MLInt_devel' vignette from Sweave to Rmarkdown / HTML."
-    ))
+        comment = "Translated vignettes from Sweave to Rmarkdown / HTML."
+          ))
 Description: This package provides uniform interfaces to machine 
 	learning code for data in R and Bioconductor containers.
-Maintainer: V. Carey <stvjc@channing.harvard.edu>
 License: LGPL
 Depends: R (>= 3.5), Rcpp, methods, BiocGenerics (>= 0.13.11), Biobase,
         annotate, cluster
