@@ -78,5 +78,16 @@ rf2 <- MLearn(ALL.AML~., smallG, randomForestI, 1:40, importance=TRUE,
 plot( getVarImp( rf2, FALSE ), n=10, plat="hu6800", toktype="SYMBOL")
 par(opar)
 report( getVarImp( rf2, FALSE ), n=10, plat="hu6800", toktype="SYMBOL")
+requireNamespace("airway")
+requireNamespace("SummarizedExperiment")
+data(airway, package="airway")
+set.seed(1234)
+xx = MLearn(dex~., data=airway[1:2000,], randomForestI, 1:8, importance=TRUE)
+RObject(xx)
+vi = getVarImp(xx)
+tm = SummarizedExperiment::rowData(airway)$gene_name
+names(tm) = rownames(airway)
+par(mar=c(4,8,3,3))
+plot(vi, tmap=tm, las=2)
 }
 \keyword{classes}

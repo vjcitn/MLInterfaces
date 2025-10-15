@@ -59,9 +59,9 @@ se2df = function(x,keep=NULL,assayind=1L) {
 #
 # the keep parameter says which colData vars are kept in
 #
-   if (is.null(keep)) return(data.frame(t(assays(x, assayind)),colData(x), stringsAsFactors = TRUE))
+   if (is.null(keep)) return(data.frame(t(assay(x, assayind, withDimnames=TRUE)),colData(x), stringsAsFactors = TRUE))
    else {
-        tmp = data.frame(t(assays(x, assayind)),colData(x)[[keep]], stringsAsFactors = TRUE)
+        tmp = data.frame(t(assay(x, assayind, withDimnames=TRUE)),colData(x)[[keep]], stringsAsFactors = TRUE)
         names(tmp)[ncol(tmp)] = keep  # the assumption is that there is a single response in formula
         return(tmp)
         }

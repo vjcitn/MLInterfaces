@@ -32,6 +32,7 @@
 \alias{adaI}
 \alias{MLearn,formula,ExpressionSet,character,numeric-method}
 \alias{MLearn,formula,ExpressionSet,learnerSchema,numeric-method}
+\alias{MLearn,formula,SummarizedExperiment,learnerSchema,numeric-method}
 \alias{MLearn,formula,data.frame,learnerSchema,numeric-method}
 \alias{MLearn,formula,data.frame,learnerSchema,xvalSpec-method}
 \alias{MLearn,formula,ExpressionSet,learnerSchema,xvalSpec-method}
@@ -57,7 +58,7 @@ makeLearnerSchema(packname, mlfunname, converter, predicter)
 }
 \arguments{
   \item{formula}{ standard model formula }
-  \item{data}{ data.frame or ExpressionSet instance}
+  \item{data}{ data.frame or ExpressionSet or SummarizedExperiment instance}
   \item{.method}{ instance of learnerSchema }
   \item{trainInd}{ obligatory numeric vector of indices of data to be used for training;
 all other data are used for testing, or instance of the xvalSpec class }

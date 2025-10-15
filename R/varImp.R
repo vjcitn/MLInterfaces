@@ -55,11 +55,12 @@ mapPSvec = function (vn, plat, toktype)
 }
 
 
-setMethod("plot", "varImpStruct", function(x, y, ..., n=20, plat, toktype) {
+setMethod("plot", "varImpStruct", function(x, y, ..., n=20, plat, toktype, tmap) {
         vn <- x@varnames
 
 # but the key thing is to get ifnotfound right below, once you have done these steps
 	if (!missing(plat)) vn = mapPSvec(vn, plat, toktype)
+        else if (!missing(tmap)) vn = tmap[vn]
 	if (x@method=="randomForest") 
 		{
 		mda <- x@.Data[,"MeanDecreaseAccuracy"]

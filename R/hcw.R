@@ -24,7 +24,7 @@ hclustWidget = function(mat, featureName="feature",
    column(2,  numericInput("numclus", label = "K:", 2, min = 1, max = nrow(mat)/2))
           ),
   fluidRow(column(7, plotOutput("tree"))),
-  fluidRow(column(7, ggvis::ggvisOutput("pcp")))
+  fluidRow(column(7, plotlyOutput("pcp"))) #ggvis::ggvisOutput("pcp")))
  ), server= function(input, output, session) {
     output$title <- renderText(title)
     output$tree <- renderPlot({
@@ -37,29 +37,39 @@ sink(NULL)
       plot(dend, main=paste0("Boot. Jacc. at k=", input$numclus, ": ",
         paste(round(cb$bootmean,2), collapse=", ")), xlab=" ")
     })
-    P1 <- reactive({
-           all_values <- function(x) {
-             if(is.null(x)) return(NULL)
-             row <- pcdf[pcdf$rowid == x$rowid, ]
-             paste0(names(row), ": ", format(row), collapse = "<br />")
-           }
-
+    output$pcp = renderPlotly({
       pc = prcomp(mat[,seq_len(input$ngenes)])$x
       dm = dist(mat[,seq_len(input$ngenes)], method=input$distmeth)
-
-
       dend = hclust( dm, method=input$fusemeth )
       ct = cutree(dend, k=input$numclus)
-      pcdf = data.frame(PC1=pc[,1], PC2=pc[,2], #tiss=pData(tiss)$Tissue,
+      pcdf = data.frame(PC1=pc[,1], PC2=pc[,2], 
          rowid=seq_len(nrow(pc)), assigned=factor(ct))
-      if (!is.null(auxdf)) {
-         if ((nrow(auxdf) == nrow(pcdf))) pcdf = cbind(pcdf, auxdf)
-           else message("nrow(auxdf) != nrow(mat), ignoring auxdf")
-         }
-      pcdf %>% ggvis::ggvis(~PC1, ~PC2, key := ~rowid, fill = ~assigned) %>% ggvis::layer_points() %>%
-               ggvis::add_tooltip(all_values, "hover") 
-      }) 
-      P1 %>% ggvis::bind_shiny("pcp")
+      t1 = ggplot(pcdf, aes(x=PC1, y=PC2, colour=assigned)) + geom_point(size=1.5)
+      ggplotly(t1)
+      })
+
+#    P1 <- reactive({
+#           all_values <- function(x) {
+#             if(is.null(x)) return(NULL)
+#             row <- pcdf[pcdf$rowid == x$rowid, ]
+#             paste0(names(row), ": ", format(row), collapse = "<br />")
+#           }
+#
+#      pc = prcomp(mat[,seq_len(input$ngenes)])$x
+#      dm = dist(mat[,seq_len(input$ngenes)], method=input$distmeth)
+#
+#      dend = hclust( dm, method=input$fusemeth )
+#      ct = cutree(dend, k=input$numclus)
+#      pcdf = data.frame(PC1=pc[,1], PC2=pc[,2], #tiss=pData(tiss)$Tissue,
+#         rowid=seq_len(nrow(pc)), assigned=factor(ct))
+#      if (!is.null(auxdf)) {
+#         if ((nrow(auxdf) == nrow(pcdf))) pcdf = cbind(pcdf, auxdf)
+#           else message("nrow(auxdf) != nrow(mat), ignoring auxdf")
+#         }
+#      pcdf %>% ggvis::ggvis(~PC1, ~PC2, key := ~rowid, fill = ~assigned) %>% ggvis::layer_points() %>%
+#               ggvis::add_tooltip(all_values, "hover") 
+#      }) 
+#      P1 %>% ggvis::bind_shiny("pcp")
       observe({
          if (input$btnSend > 0)
             isolate({
